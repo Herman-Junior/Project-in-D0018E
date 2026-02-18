@@ -6,6 +6,7 @@ USE MeetDatabase;
 CREATE TABLE USERS (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL UNIQUE,
+    password
     email VARCHAR(100) UNIQUE,
     team BOOLEAN
 );
