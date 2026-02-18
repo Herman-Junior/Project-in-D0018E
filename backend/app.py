@@ -1,16 +1,26 @@
+from flask import Flask
+from flask_jwt_extended import JWTManager
+from extensions import db, bcrypt, cors
+from config import config_map
 import os
 
-from flask import Flask, jsonify
-from flask_cors import CORS
+def create_app():
+    app = Flask(__name__)
 
-app = Flask(__name__)
-CORS(app)
+    env = os.getenv("FLASK_ENV", "production")
+    app.config.from_object(config_map[env])
 
+    db.init_app(app)
+    bcrypt.init_app(app)
+    cors.init_app(app)
+    JWTManager(app)
 
-@app.route("/api/test")
-def test():
-    return jsonify({"status": "success", "message": "flask is connected "})
+    # Import all models here so SQLAlchemy registers them before any route runs
+    with app.app_context():
+        from models import User
+        db.create_all()
 
-    
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port = 8000, debug = True)
+    from blueprints.auth import auth_bp
+    app.register_blueprint(auth_bp, url_prefix="/api/auth")
+
+    return app

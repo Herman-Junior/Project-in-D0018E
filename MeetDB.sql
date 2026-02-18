@@ -1,5 +1,5 @@
 -- Active: 1770040573308@@localhost@3306
-CREATE DATABASE MeetDatabase;
+CREATE DATABASE IF NOT EXISTS MeetDatabase;
 USE MeetDatabase;
 
 -- USERS TABLE
@@ -86,3 +86,5 @@ CREATE TABLE REVIEW (
     FOREIGN KEY (product_id) REFERENCES PRODUCTS(product_id),
     FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
+
+
