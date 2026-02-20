@@ -1,4 +1,4 @@
--- Active: 1770040573308@@localhost@3306
+-- Active: 1771429691299@@127.0.0.1@3306@mysql
 CREATE DATABASE IF NOT EXISTS MeetDatabase;
 USE MeetDatabase;
 
@@ -50,10 +50,9 @@ CREATE TABLE ORDERS (
     order_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT,
     method VARCHAR(50),
-    price INT,
+    total_price INT,
     payment_details VARCHAR(255),
-    FOREIGN KEY (user_id) REFERENCES USERS(user_id),
-    FOREIGN KEY (price) REFERENCES PRODUCTS(price)
+    FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
 
 -- CART TABLE
@@ -88,3 +87,6 @@ CREATE TABLE REVIEW (
 );
 
 
+SELECT * FROM USERS;
+
+SELECT * FROM CART;
