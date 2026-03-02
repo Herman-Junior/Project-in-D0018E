@@ -86,7 +86,18 @@ CREATE TABLE REVIEW (
     FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
 
+SELECT * FROM PRODUCTS;
 
-SELECT * FROM USERS;
+SHOW TABLES;
 
-SELECT * FROM CART;
+INSERT INTO CATEGORY (category_name) 
+VALUES ('Elektronik') 
+ON DUPLICATE KEY UPDATE category_name='Elektronik';
+
+-- 3. Lägg in en produkt
+INSERT INTO PRODUCTS (category_id, name, price, description) 
+VALUES (1, 'Chark', 599, 'RGB-belysning');
+
+-- 4. Lägg in lagersaldo (valfritt, men bra för din Inventory-relation)
+INSERT INTO INVENTORY (product_id, amount, unit_type) 
+VALUES (LAST_INSERT_ID(), 50, 'st');

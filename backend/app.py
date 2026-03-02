@@ -4,6 +4,7 @@ from extensions import db, bcrypt, cors
 from config import config_map
 import os
 
+
 def create_app():
     app = Flask(__name__)
 
@@ -21,6 +22,8 @@ def create_app():
         db.create_all()
 
     from blueprints.auth import auth_bp
+    from blueprints.products import products_bp
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
+    app.register_blueprint(products_bp, url_prefix="/api")
 
     return app
