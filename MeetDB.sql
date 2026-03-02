@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 -- Active: 1763569423496@@localhost@3306@meetdatabase
-=======
--- Active: 1771429691299@@127.0.0.1@3306@mysql
->>>>>>> 88f94dcd1611a48551995ff6dc00b6a3d1b28f21
 CREATE DATABASE IF NOT EXISTS MeetDatabase;
 USE MeetDatabase;
 DROP DATABASE MeetDatabase;
@@ -94,19 +90,13 @@ CREATE TABLE REVIEW (
 
 SELECT * FROM PRODUCTS;
 
-<<<<<<< HEAD
 SELECT * FROM USERS;
 
 SELECT * FROM CART;
 
 USE MeetDatabase;
 
-USE MeetDatabase;
--- Create category first
-INSERT INTO CATEGORY (category_name) VALUES ('Boards');
--- Add products
-INSERT INTO PRODUCTS (name, price, description, category_id) 
-VALUES ('Deluxe Board', 120, 'Premium Selection', 1);
+
 DROP TABLE IF EXISTS ORDER_ITEMS;
 DROP TABLE IF EXISTS CART;
 DROP TABLE IF EXISTS ORDERS;
@@ -118,20 +108,26 @@ DROP TABLE IF EXISTS CATEGORY;
 DROP TABLE IF EXISTS USERS;
 
 
-=======
 SHOW TABLES;
 
+SELECT * FROM PRODUCTS;
+USE MeetDatabase;
+-- Create category first
+
+-- Add products
+INSERT INTO PRODUCTS (name, price, description, category_id) 
+VALUES ('Delue Board', 120, 'Premium Selection', 1);
+
 INSERT INTO CATEGORY (category_name) 
-VALUES ('Elektronik') 
-ON DUPLICATE KEY UPDATE category_name='Elektronik';
+VALUES ('Boards') 
+ON DUPLICATE KEY UPDATE category_name='Boards';
 
 -- 3. Lägg in en produkt
 INSERT INTO PRODUCTS (category_id, name, price, description) 
-VALUES (1, 'Chark', 599, 'RGB-belysning');
+VALUES (1, 'Delue Board', 599, 'Premium selection of meats for the discerning palate.');
 
 -- 4. Lägg in lagersaldo (valfritt, men bra för din Inventory-relation)
 INSERT INTO INVENTORY (product_id, amount, unit_type) 
 VALUES (LAST_INSERT_ID(), 50, 'st');
 
 DROP DATABASE MeetDatabase;
->>>>>>> 88f94dcd1611a48551995ff6dc00b6a3d1b28f21
