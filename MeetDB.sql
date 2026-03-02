@@ -1,4 +1,4 @@
--- Active: 1770040573308@@localhost@3306
+-- Active: 1763569423496@@localhost@3306@meetdatabase
 CREATE DATABASE IF NOT EXISTS MeetDatabase;
 USE MeetDatabase;
 
@@ -24,6 +24,7 @@ CREATE TABLE PRODUCTS (
     name VARCHAR(100) UNIQUE,
     price INT,
     description VARCHAR(255),
+    is_public BOOLEAN DEFAULT 1,
     FOREIGN KEY (category_id) REFERENCES CATEGORY(category_id)
 );
 
@@ -50,10 +51,9 @@ CREATE TABLE ORDERS (
     order_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT,
     method VARCHAR(50),
-    price INT,
+    total_price INT,
     payment_details VARCHAR(255),
-    FOREIGN KEY (user_id) REFERENCES USERS(user_id),
-    FOREIGN KEY (price) REFERENCES PRODUCTS(price)
+    FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
 
 -- CART TABLE
@@ -86,5 +86,28 @@ CREATE TABLE REVIEW (
     FOREIGN KEY (product_id) REFERENCES PRODUCTS(product_id),
     FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
+
+
+SELECT * FROM USERS;
+
+SELECT * FROM CART;
+
+USE MeetDatabase;
+
+USE MeetDatabase;
+-- Create category first
+INSERT INTO CATEGORY (category_name) VALUES ('Boards');
+-- Add products
+INSERT INTO PRODUCTS (name, price, description, category_id) 
+VALUES ('Deluxe Board', 120, 'Premium Selection', 1);
+DROP TABLE IF EXISTS ORDER_ITEMS;
+DROP TABLE IF EXISTS CART;
+DROP TABLE IF EXISTS ORDERS;
+DROP TABLE IF EXISTS REVIEW;
+DROP TABLE IF EXISTS ADDRESS;
+DROP TABLE IF EXISTS INVENTORY;
+DROP TABLE IF EXISTS PRODUCTS;
+DROP TABLE IF EXISTS CATEGORY;
+DROP TABLE IF EXISTS USERS;
 
 
