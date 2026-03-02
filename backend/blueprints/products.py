@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # NEW - Blueprint for product routes
 from flask import Blueprint, jsonify
 from models import Products
@@ -8,12 +7,9 @@ products_bp = Blueprint("products", __name__)
 # NEW - Route to get all products from the database
 @products_bp.route("/products", methods=["GET"])
 def get_products():
-    products = Product.query.all()
+    products = Products.query.all()
     return jsonify([p.to_dict() for p in products]), 200
 
-=======
-#Products.py
->>>>>>> 88f94dcd1611a48551995ff6dc00b6a3d1b28f21
 from flask import Blueprint, request, jsonify
 from extensions import db
 from models import Products
@@ -24,11 +20,6 @@ products_bp = Blueprint("products", __name__)
 def view_products():
     try:
         print(f"DEBUG: Ansluten till URI: {db.engine.url}")
-<<<<<<< HEAD
-
-=======
-        
->>>>>>> 88f94dcd1611a48551995ff6dc00b6a3d1b28f21
         count = db.session.query(Products).count()
         print(f"DEBUG: Antal rader i PRODUCTS: {count}")
 
@@ -48,8 +39,4 @@ def get_product(product_id:int):
             return jsonify(product.to_dict()), 200
     except Exception as e:
         print(f"DEBUG: Fel uppstod: {e}")
-<<<<<<< HEAD
         return jsonify({"error": str(e)}), 500
-=======
-        return jsonify({"error": str(e)}), 500
->>>>>>> 88f94dcd1611a48551995ff6dc00b6a3d1b28f21
