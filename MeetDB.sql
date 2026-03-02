@@ -1,7 +1,11 @@
+<<<<<<< HEAD
 -- Active: 1763569423496@@localhost@3306@meetdatabase
+=======
+-- Active: 1771429691299@@127.0.0.1@3306@mysql
+>>>>>>> 88f94dcd1611a48551995ff6dc00b6a3d1b28f21
 CREATE DATABASE IF NOT EXISTS MeetDatabase;
 USE MeetDatabase;
-
+DROP DATABASE MeetDatabase;
 -- USERS TABLE
 CREATE TABLE USERS (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -28,6 +32,7 @@ CREATE TABLE PRODUCTS (
     FOREIGN KEY (category_id) REFERENCES CATEGORY(category_id)
 );
 
+DROP TABLE PRODUCTS;
 -- INVENTORY TABLE
 CREATE TABLE INVENTORY (
     product_id INT PRIMARY KEY,
@@ -87,7 +92,9 @@ CREATE TABLE REVIEW (
     FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
 
+SELECT * FROM PRODUCTS;
 
+<<<<<<< HEAD
 SELECT * FROM USERS;
 
 SELECT * FROM CART;
@@ -111,3 +118,20 @@ DROP TABLE IF EXISTS CATEGORY;
 DROP TABLE IF EXISTS USERS;
 
 
+=======
+SHOW TABLES;
+
+INSERT INTO CATEGORY (category_name) 
+VALUES ('Elektronik') 
+ON DUPLICATE KEY UPDATE category_name='Elektronik';
+
+-- 3. Lägg in en produkt
+INSERT INTO PRODUCTS (category_id, name, price, description) 
+VALUES (1, 'Chark', 599, 'RGB-belysning');
+
+-- 4. Lägg in lagersaldo (valfritt, men bra för din Inventory-relation)
+INSERT INTO INVENTORY (product_id, amount, unit_type) 
+VALUES (LAST_INSERT_ID(), 50, 'st');
+
+DROP DATABASE MeetDatabase;
+>>>>>>> 88f94dcd1611a48551995ff6dc00b6a3d1b28f21

@@ -65,8 +65,12 @@ class Products(db.Model):
             "name": self.name,
             "price": self.price,
             "description": self.description,
+<<<<<<< HEAD
             "is_public": self.is_public,
             "image": "https://placehold.co/400"
+=======
+            "is_public": self.is_public
+>>>>>>> 88f94dcd1611a48551995ff6dc00b6a3d1b28f21
         }
 
 class Inventory(db.Model):
@@ -104,5 +108,9 @@ class Review(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey("PRODUCTS.product_id"))
     user_id = db.Column(db.Integer, db.ForeignKey("USERS.user_id"))
     rating = db.Column(db.Integer)
+<<<<<<< HEAD
     comment = db.Column(db.String(255))
 
+=======
+    comment = db.Column(db.String(255))
+>>>>>>> 88f94dcd1611a48551995ff6dc00b6a3d1b28f21
