@@ -5,7 +5,6 @@ from flask_cors import CORS
 from config import config_map
 import os
 
-
 def create_app():
     app = Flask(__name__)
 
@@ -19,19 +18,19 @@ def create_app():
     JWTManager(app)
 
     with app.app_context():
-        # NEW - Include Category here for table creation
-        from models import User, Product, Category 
+        from models import User, Products, Category 
         db.create_all()
 
+    from blueprints.inventory import inventory_bp
     from blueprints.auth import auth_bp
     from blueprints.products import products_bp
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(products_bp, url_prefix="/api")
-
-    from blueprints.products import products_bp
-    app.register_blueprint(products_bp, url_prefix="/api")
+    app.register_blueprint(inventory_bp, url_prefix="/api")
 
     return app
+
+app = create_app()
 
 if __name__ == "__main__":
     app = create_app()

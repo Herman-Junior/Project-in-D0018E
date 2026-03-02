@@ -1,3 +1,4 @@
+#Products.py
 from flask import Blueprint, request, jsonify
 from extensions import db
 from models import Products
@@ -12,8 +13,8 @@ def view_products():
         count = db.session.query(Products).count()
         print(f"DEBUG: Antal rader i PRODUCTS: {count}")
 
-        products_query = Products.query.all()
-        return jsonify([p.to_dict() for p in products_query]), 200
+        products = Products.query.filter_by(is_public=True).all()
+        return jsonify([p.to_dict() for p in products if p.inventory and p.inventory.amount > 0]), 200
     except Exception as e:
         print(f"DEBUG: Fel uppstod: {e}")
         return jsonify({"error": str(e)}), 500

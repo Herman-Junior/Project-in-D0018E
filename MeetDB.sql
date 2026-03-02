@@ -1,7 +1,7 @@
 -- Active: 1771429691299@@127.0.0.1@3306@mysql
 CREATE DATABASE IF NOT EXISTS MeetDatabase;
 USE MeetDatabase;
-
+DROP DATABASE MeetDatabase;
 -- USERS TABLE
 CREATE TABLE USERS (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -24,9 +24,11 @@ CREATE TABLE PRODUCTS (
     name VARCHAR(100) UNIQUE,
     price INT,
     description VARCHAR(255),
+    is_public BOOLEAN DEFAULT 1,
     FOREIGN KEY (category_id) REFERENCES CATEGORY(category_id)
 );
 
+DROP TABLE PRODUCTS;
 -- INVENTORY TABLE
 CREATE TABLE INVENTORY (
     product_id INT PRIMARY KEY,
@@ -101,3 +103,5 @@ VALUES (1, 'Chark', 599, 'RGB-belysning');
 -- 4. Lägg in lagersaldo (valfritt, men bra för din Inventory-relation)
 INSERT INTO INVENTORY (product_id, amount, unit_type) 
 VALUES (LAST_INSERT_ID(), 50, 'st');
+
+DROP DATABASE MeetDatabase;

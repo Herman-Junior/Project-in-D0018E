@@ -1,6 +1,7 @@
-models.py
+#models.py
 from extensions import db, bcrypt
 from datetime import datetime
+
 
 class User(db.Model):
     __tablename__ = "USERS"
@@ -52,6 +53,7 @@ class Products(db.Model):
     name = db.Column(db.String(100), unique=True)
     price = db.Column(db.Integer)
     description = db.Column(db.String(255))
+    is_public = db.Column(db.Boolean, default=True)
 
     inventory = db.relationship("Inventory", backref="product", uselist=False, lazy=True)
     cart_items = db.relationship("Cart", backref="product", lazy=True)
@@ -62,7 +64,8 @@ class Products(db.Model):
             "product_id": self.product_id,
             "name": self.name,
             "price": self.price,
-            "description": self.description
+            "description": self.description,
+            "is_public": self.is_public
         }
 
 class Inventory(db.Model):
