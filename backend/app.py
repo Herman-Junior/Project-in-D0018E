@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_jwt_extended import JWTManager
-from extensions import db, bcrypt, cors
+from extensions import db, bcrypt
+from flask_cors import CORS
 from config import config_map
 import os
 
@@ -13,12 +14,13 @@ def create_app():
 
     db.init_app(app)
     bcrypt.init_app(app)
-    cors.init_app(app)
+    # NEW - Explicitly allow the frontend port
+    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
     JWTManager(app)
 
-    # Import all models here so SQLAlchemy registers them before any route runs
     with app.app_context():
-        from models import User
+        # NEW - Include Category here for table creation
+        from models import User, Product, Category 
         db.create_all()
 
     from blueprints.auth import auth_bp
@@ -26,4 +28,11 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(products_bp, url_prefix="/api")
 
+    from blueprints.products import products_bp
+    app.register_blueprint(products_bp, url_prefix="/api")
+
     return app
+
+if __name__ == "__main__":
+    app = create_app()
+    app.run(debug=True, port=5000)

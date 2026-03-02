@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100" width="120" height="100">
+  <!-- MEAT (top) -->
+  <text x="60" y="35" 
+        font-family="Questrial, sans-serif" 
+        font-size="28" 
+        font-weight="bold"
+        fill="#6e1810" 
+        text-anchor="middle" 
+        letter-spacing="3">MEAT</text>
+
+  <!-- 4 (big, center) -->
+  <text x="60" y="72" 
+        font-family="Questrial, sans-serif" 
+        font-size="65" 
+        font-weight="bold"
+        fill="#1f1305" 
+        text-anchor="middle">4</text>
+
+<!-- MEAT (bottom) -->
+  <text x="60" y="95" 
+        font-family="Questrial, sans-serif" 
+        font-size="28" 
+        font-weight="bold"
+        fill="#6e1810" 
+        text-anchor="middle" 
+        letter-spacing="3">MEET</text>
+</svg>
