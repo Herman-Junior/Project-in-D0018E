@@ -66,7 +66,7 @@ class Products(db.Model):
             "price": self.price,
             "description": self.description,
             "is_public": self.is_public,
-            "image": "https://placehold.co/400"
+            "image": "https://placehold.co/400" 
         }
 
 class Inventory(db.Model):
@@ -105,4 +105,6 @@ class Review(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("USERS.user_id"))
     rating = db.Column(db.Integer)
     comment = db.Column(db.String(255))
+
+
 
