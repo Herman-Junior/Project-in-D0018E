@@ -11,7 +11,6 @@ class User(db.Model):
     password_hash = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(100), unique=True)
     team = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     addresses = db.relationship("Address", backref="user", lazy=True)
     orders = db.relationship("Orders", backref="user", lazy=True)

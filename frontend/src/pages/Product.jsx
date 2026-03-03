@@ -4,7 +4,7 @@ import { ShopContext } from "../context/ShopContext";
 
 const Product = () => {
   const { productId } = useParams();
-  const { currency, products } = useContext(ShopContext);
+  const { currency, products, addtoCart } = useContext(ShopContext);
 
   const [productData, setProductData] = useState(null);
 
@@ -17,12 +17,14 @@ const Product = () => {
 
   if (!productData)
     return (
-      <div className="p-10 text-center font-light uppercase tracking-widest opacity-50">
+      <div className="p-10 text-center font-light uppercase tracking-widest opacity-50"
+        style={{ color: '#5C1A1B' }}>
         Loading Product...
       </div>
     );
 
-  const isOutOfStock = !productData.stock || productData.stock <= 0;
+  //const isOutOfStock = !productData.inventory || productData.inventory.stock <= 0;
+  const isOutOfStock = productData.stock !== undefined && productData.stock <= 0;
 
   return (
     <div className="max-w-6xl mx-auto p-5 sm:p-10 mt-10">
@@ -39,43 +41,64 @@ const Product = () => {
 
         {/* RIGHT: INFO */}
         <div className="w-full sm:w-1/2 flex flex-col">
-          <nav className="text-xs uppercase mb-4 tracking-widest opacity-60">
+
+          {/* Breadcrumb */}
+          <nav className="text-xs uppercase mb-4 tracking-widest opacity-60"
+            style={{ color: '#5C1A1B' }}>
             Products / {productData.name}
           </nav>
 
-          <h1 className="text-4xl font-semibold mb-2 uppercase italic tracking-tighter">
+          {/* Title */}
+          <h1 className="text-4xl font-bold mb-2 uppercase tracking-tight"
+            style={{ color: '#5C1A1B', fontStyle: 'italic' }}>
             {productData.name}
           </h1>
 
-          <p className="text-3xl font-light mb-6">
+          {/* Price */}
+          <p className="text-3xl font-light mb-6"
+            style={{ color: '#5C1A1B' }}>
             {productData.price} {currency}
           </p>
 
-          <p className="text-sm uppercase opacity-60 mb-4">
+          {/* Category */}
+          <p className="text-sm uppercase mb-4 tracking-widest"
+            style={{ color: '#5C1A1B', opacity: 0.6 }}>
             Category: {productData.category_name}
           </p>
 
-          <hr className="mb-6" />
+          <hr style={{ borderColor: '#5C1A1B', opacity: 0.3 }} className="mb-6" />
 
-          <h3 className="text-sm font-bold uppercase mb-2">Description</h3>
-          <p className="leading-relaxed text-sm sm:text-base mb-8">
+          {/* Description */}
+          <h3 className="text-sm font-bold uppercase mb-2"
+            style={{ color: '#5C1A1B' }}>
+            Description
+          </h3>
+          <p className="leading-relaxed text-sm sm:text-base mb-8"
+            style={{ color: '#5C1A1B' }}>
             {productData.description}
           </p>
 
+          {/* Button */}
           <button
+            onClick={() => addtoCart(productData.product_id)}
             disabled={isOutOfStock}
-            className={`w-full py-4 px-10 text-sm font-bold transition-all 
-              ${isOutOfStock
-                ? "bg-gray-400 text-white cursor-not-allowed"
-                : "bg-black text-white hover:opacity-80 active:scale-[0.98]"
-              }`}
+            className="w-full py-4 px-10 text-sm font-bold uppercase tracking-widest transition-all active:scale-[0.98]"
+            style={{
+              backgroundColor: isOutOfStock ? '#aaa' : '#5C1A1B',
+              color: '#fff',
+              cursor: isOutOfStock ? 'not-allowed' : 'pointer',
+            }}
+            onMouseEnter={e => { if (!isOutOfStock) e.target.style.opacity = '0.8' }}
+            onMouseLeave={e => { e.target.style.opacity = '1' }}
           >
             {isOutOfStock ? "SOLD OUT" : "ADD TO CART"}
           </button>
 
-          <p className="text-[10px] text-center uppercase tracking-widest opacity-60 mt-4">
-            Free shipping on all orders • 30-day return policy
+          <p className="text-[10px] text-center uppercase tracking-widest mt-4"
+            style={{ color: '#5C1A1B', opacity: 0.5 }}>
+            Free shipping over 3 items • 30-day return policy
           </p>
+
         </div>
       </div>
     </div>
