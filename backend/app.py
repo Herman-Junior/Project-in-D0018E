@@ -21,15 +21,13 @@ def create_app():
         from models import User, Products, Category 
         db.create_all()
 
-    #from blueprints.inventory import inventory_bp
-    #from blueprints.inventory import inventory_bp
+    from blueprints.inventory import inventory_bp
     from blueprints.auth import auth_bp
     from blueprints.products import products_bp
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(products_bp, url_prefix="/api")
-    #app.register_blueprint(inventory_bp, url_prefix="/api")
-    #app.register_blueprint(inventory_bp, url_prefix="/api")
-
+    app.register_blueprint(inventory_bp, url_prefix="/api")
+    
     return app
 
 app = create_app()
@@ -38,4 +36,4 @@ if __name__ == "__main__":
     app = create_app()
     app.run(debug=True, port=5000)
 
-    ###
+    
