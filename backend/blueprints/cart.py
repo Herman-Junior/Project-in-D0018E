@@ -37,7 +37,7 @@ def cart_response(user_id):
 
 @cart_bp.route("/cart", methods=["GET"])
 @jwt_required()
-def get_updatecart():
+def view_cart():
     try: 
         user_id = get_jwt_identity()
         return jsonify(cart_response(user_id)), 200
@@ -45,6 +45,9 @@ def get_updatecart():
         return jsonify({"error": str(e)}), 500
 
 
+
+def updatecart(user_id):
+    return cart_response(user_id)
 
 
 @cart_bp.route("/cart/add", methods=["POST"])
@@ -56,8 +59,8 @@ def add_to_cart():
     product_id = data.get("product_id")
     quantity = data.get("quantity", 1)
 
-        if not product_id:
-            return jsonify({"error": "product_id is required"}), 400
+    if not product_id:
+        return jsonify({"error": "product_id is required"}), 400
 
     item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
 
@@ -69,4 +72,28 @@ def add_to_cart():
 
     db.session.commit()
     return jsonify(cart_response(user_id)), 200
-    
+
+
+@cart_bp.route("/cart/remove", methods=["PUT"])
+@jwt_required()
+def remove_from_cart():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+    product_id = data.get("product_id")
+    quantity = data.get("quantity", 1)
+
+    if not product_id:
+        return jsonify({"error": "product_id is required"}), 400
+
+    item = Cart.query.filter_by(user_id=user_id, product_id=product_id).first()
+
+    if not item:                                                     
+        return jsonify({"error": "Product not found in cart"}), 404
+
+    item.quantity -= quantity
+
+    if item.quantity <= 0:                                         
+        db.session.delete(item)                                       
+
+    db.session.commit()
+    return jsonify(cart_response(user_id)), 200
