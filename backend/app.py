@@ -26,8 +26,12 @@ def create_app():
     from blueprints.products import products_bp
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(products_bp, url_prefix="/api")
-    app.register_blueprint(inventory_bp, url_prefix="/api")
-    
+    #app.register_blueprint(inventory_bp, url_prefix="/api")
+    #app.register_blueprint(inventory_bp, url_prefix="/api")
+    from blueprints.admin import admin_bp
+    app.register_blueprint(admin_bp, url_prefix="/api/admin")
+
+
     return app
 
 app = create_app()
