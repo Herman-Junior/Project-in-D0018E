@@ -77,7 +77,7 @@ def add_to_cart():
 @cart_bp.route("/cart/remove", methods=["PUT"])
 @jwt_required()
 def remove_from_cart():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     data = request.get_json()
     product_id = data.get("product_id")
     quantity = data.get("quantity", 1)

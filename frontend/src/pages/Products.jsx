@@ -25,11 +25,11 @@ const Products = () => {
 
         <div  className= "flex flex-col gap-2 text-sm font-light text-black">
           <p className ="flex gap-2">
-            <input className= "w-3" type = "checkbox" id="charcuterie" name="charcuterie" value={'charcuterie'}/> Meat 
+            <input className= "w-3" type = "checkbox" id="charcuterie" name="charcuterie" value={'charcuterie'}/> Boards 
           </p>
 
           <p className ="flex gap-2">
-            <input className= "w-3" type = "checkbox" id="cheese" name="cheese" value={'Cheese'}/> Cheese 
+            <input className= "w-3" type = "checkbox" id="cheese" name="cheese" value={'Elektronik'}/> Elektronik 
           </p>
 
           <p className ="flex gap-2">
