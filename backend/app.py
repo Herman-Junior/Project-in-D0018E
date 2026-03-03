@@ -29,6 +29,9 @@ def create_app():
     app.register_blueprint(products_bp, url_prefix="/api")
     #app.register_blueprint(inventory_bp, url_prefix="/api")
     #app.register_blueprint(inventory_bp, url_prefix="/api")
+    from blueprints.admin import admin_bp
+    app.register_blueprint(admin_bp, url_prefix="/api/admin")
+
 
     return app
 
