@@ -16,13 +16,10 @@ const Products = () => {
   },[]);
   return (
     <div className= 'flex flex-col sm:flex-row gap-1 sm:gap-10 pt-8 border-t'>
-
       {/* Filter Options */}
       <div className= "min-w-60">
         <p className='my-2 text-x1 flex items-center cursor-pointer gap-2'> FILTERS </p>
-
       {/* Catogary Options */}
-
       <div className= {"hidden sm:block border border-gray-300  pl-5 py-4 mt-6 $(showFilters ? 'block' : 'hidden')} sm:block"}>
         <p className= "mb-3 text-sm font-medium">CATEGORIES</p>
 
@@ -41,15 +38,12 @@ const Products = () => {
         </div>
       </div>
       </div>
-
-      {/* Right side */}
+       {/* Right side */}
       <div className = "flex-1">
 
         <div className = "flex justify-between text-sm sm:text-base mb-4">
           < Title text1={"OUR"} text2={"PRODUCTS"}/>
         </div>
-
-
       </div>
        {/* MAP PRODUCTS */}
         <div className = "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6i">
