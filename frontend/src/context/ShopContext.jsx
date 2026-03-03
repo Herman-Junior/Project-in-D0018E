@@ -1,11 +1,19 @@
 import React, { createContext, useState, useEffect } from 'react';
 
-export const ShopContext = createContext({ products: [], currency: 'EUR' });
+export const ShopContext = createContext();
 
 export const ShopContextProvider = ({ children }) => {
     const currency = 'EUR';
     const [products, setProducts] = useState([]);
     const [cartItems, setCartItems] = useState([]);
+    const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token')); // new
+
+    const logout = () => { // new
+        localStorage.removeItem('token');
+        localStorage.removeItem('user_id');
+        setIsLoggedIn(false);
+        setCartItems([]);
+    };
 
     const addtoCart = async (product_id) => {
         const token = localStorage.getItem('token');
@@ -23,7 +31,6 @@ export const ShopContextProvider = ({ children }) => {
         } catch (error) { console.error("Add to cart error:", error); alert(error.message); }
     };
 
-    // new - remove item entirely from cart
     const removeFromCart = async (product_id) => {
         const token = localStorage.getItem('token');
         if (!token) return;
@@ -40,7 +47,6 @@ export const ShopContextProvider = ({ children }) => {
         } catch (error) { console.error("Remove error:", error); }
     };
 
-    // new - increase or decrease quantity by 1
     const updateQuantity = async (product_id, change) => {
         const token = localStorage.getItem('token');
         if (!token) return;
@@ -60,13 +66,23 @@ export const ShopContextProvider = ({ children }) => {
     useEffect(() => {
         fetch('http://127.0.0.1:5000/api/products')
             .then(res => res.json())
-            .then(data => { console.log('Fetched Products:', data); setProducts(data); })
+            .then(data => setProducts(data))
             .catch(err => console.error('Fetch error:', err));
     }, []);
 
-    useEffect(() => { console.log('Cart Items Updated:', cartItems); }, [cartItems]);
+    // new - fetch cart on load if logged in
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        fetch('http://127.0.0.1:5000/api/cart', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => { if (data.cart) setCartItems(data.cart); })
+            .catch(err => console.error('Cart fetch error:', err));
+    }, [isLoggedIn]);
 
-    const value = { products, currency, cartItems, addtoCart, removeFromCart, updateQuantity };
+    const value = { products, currency, cartItems, isLoggedIn, setIsLoggedIn, addtoCart, removeFromCart, updateQuantity, logout };
 
     return (
         <ShopContext.Provider value={value}>
