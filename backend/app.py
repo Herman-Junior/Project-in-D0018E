@@ -31,7 +31,8 @@ def create_app():
     #app.register_blueprint(inventory_bp, url_prefix="/api")
     from blueprints.admin import admin_bp
     app.register_blueprint(admin_bp, url_prefix="/api/admin")
-
+    from blueprints.orders import orders_bp
+    app.register_blueprint(orders_bp, url_prefix="/api/orders")
 
     return app
 

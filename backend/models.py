@@ -84,6 +84,16 @@ class Orders(db.Model):
     payment_details = db.Column(db.String(255))
     items = db.relationship("OrderItems", backref="order", lazy=True)
 
+    def to_dict(self):
+        return {
+            "order_id": self.order_id,
+            "user_id": self.user_id,
+            "status": self.status,
+            "total_price": self.total_price,
+            "method": self.method,
+            "payment_details": self.payment_details,
+        }
+
 class Cart(db.Model):
     __tablename__ = "CART"
     cart_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -97,6 +107,7 @@ class OrderItems(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey("ORDERS.order_id"))
     product_id = db.Column(db.Integer, db.ForeignKey("PRODUCTS.product_id"))
     quantity = db.Column(db.Float)
+    product = db.relationship("Products", lazy=True)
 
 class Review(db.Model):
     __tablename__ = "REVIEW"
