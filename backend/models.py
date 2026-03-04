@@ -83,6 +83,19 @@ class Orders(db.Model):
     total_price = db.Column(db.Integer)
     payment_details = db.Column(db.String(255))
     items = db.relationship("OrderItems", backref="order", lazy=True)
+    address = db.relationship("Address", lazy=True)
+    
+
+    def to_dict(self):
+        return {
+            "order_id": self.order_id,
+            "user_id": self.user_id,
+            "status": self.status,
+            "total_price": self.total_price,
+            "method": self.method,
+            "payment_details": self.payment_details,
+        }
+
 
 class Cart(db.Model):
     __tablename__ = "CART"
