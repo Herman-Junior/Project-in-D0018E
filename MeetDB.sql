@@ -1,6 +1,7 @@
-CREATE DATABASE IF NOT EXISTS MeetDatabase;
+-- Active: 1771429691299@@127.0.0.1@3306@MeetDatabase
+    CREATE DATABASE IF NOT EXISTS MeetDatabase;
+    DROP DATABASE MeetDatabase;
     USE MeetDatabase;
-
     -- USERS TABLE
     CREATE TABLE USERS (
         user_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -41,7 +42,7 @@ CREATE DATABASE IF NOT EXISTS MeetDatabase;
         address_id INT PRIMARY KEY AUTO_INCREMENT,
         user_id INT,
         country VARCHAR(100),
-        state VARCHAR(100),
+        address VARCHAR(100),
         city VARCHAR(100),
         FOREIGN KEY (user_id) REFERENCES USERS(user_id)
     );
@@ -55,6 +56,7 @@ CREATE TABLE ORDERS (
     payment_details VARCHAR(255),
     created_at DATETIME DEFAULT NOW(),
     address_id INT,
+    status VARCHAR(50) DEFAULT 'pending',
     FOREIGN KEY (address_id) REFERENCES ADDRESS(address_id),
     FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
@@ -92,16 +94,16 @@ CREATE TABLE REVIEW (
 );
 
 INSERT INTO CATEGORY (category_name) 
-VALUES ('Salami') 
-ON DUPLICATE KEY UPDATE category_name='meat';
+VALUES ('Seal') 
+ON DUPLICATE KEY UPDATE category_name='seal';
 
 -- 3. Lägg in en produkt
 INSERT INTO PRODUCTS (category_id, name, price, description) 
-VALUES (3, 'Pruscutto', 4434, 'meat plate.');
+VALUES (2, 'saad', 4434, 'lae.');
 
 -- 4. Lägg in lagersaldo (valfritt, men bra för din Inventory-relation)
 INSERT INTO INVENTORY (product_id, amount, unit_type) 
-VALUES (7, 50, 'st');
+VALUES (2, 50, 'st');
 
 SELECT * FROM CATEGORY;
 

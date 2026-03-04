@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import PlaceOrder from "./pages/PlaceOrder";
 import Orders from "./pages/Orders";
 import Navbar from "./components/Navbar";
+import Confirmation from "./pages/Confirmation"
 import Profile from "./pages/Profile"; // new
 import ProtectedRoute from "./components/ProtectedRoute"; // new
 import AdminDashboard from "./pages/AdminPages/AdminDashboard"; // new
@@ -29,6 +30,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/place-order" element={<PlaceOrder />} />
         <Route path="/orders" element={<Orders/>} />
+        <Route path="/Confirmation/:orderId" element={<Confirmation />} />
         {/* new - profile page, only accessible when logged in */}
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         {/* new - admin panel, only accessible when logged in as admin */}

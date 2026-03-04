@@ -43,6 +43,7 @@ def create_app():
     app.register_blueprint(category_bp, url_prefix="/api")
     app.register_blueprint(review_bp, url_prefix="/api")
     app.register_blueprint(address_bp, url_prefix="/api")
+    app.register_blueprint(order_items_bp, url_prefix="/api")
 
 
     return app

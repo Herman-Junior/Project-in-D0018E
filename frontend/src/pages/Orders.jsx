@@ -12,8 +12,9 @@ const Orders = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Om användaren inte är inloggad, omdirigera till login
-    if (!isLoggedIn) { 
+    const token = localStorage.getItem('token');
+    
+    if (!token) { 
       navigate('/login'); 
       return; 
     }
@@ -22,7 +23,7 @@ const Orders = () => {
       const token = localStorage.getItem('token');
       try {
         // Ändrad till relativ sökväg för att fungera med Nginx proxy på EC2
-        const res = await fetch('/api/orders', {
+        const res = await fetch('/api/orders/', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -130,7 +131,7 @@ const Orders = () => {
                   {receipt.address && (
                     <p className='text-xs mb-3 opacity-60 uppercase tracking-widest'
                       style={{ color: '#5C1A1B' }}>
-                      Shipped to: {receipt.address.city}, {receipt.address.state}, {receipt.address.country}
+                      Shipped to: {receipt.address.address}, {receipt.address.city}, {receipt.address.country}
                     </p>
                   )}
 

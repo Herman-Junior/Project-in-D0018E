@@ -52,10 +52,10 @@ def render_checkout_success(order_id):
             "method": order.method,
             "items": items_list,
             "total_price": order.total_price,
-            "address": {                           
+            "address": {
                 "country": order.address.country,
-                "state": order.address.state,
-                "city": order.address.city
+                "city": order.address.city,
+                "address": order.address.address
             } if order.address else None
         }
     }
@@ -86,21 +86,3 @@ def receipt(order_id):
         return jsonify({"error": error}), 404
     return jsonify(data), 200
 
-
-@order_items_bp.route("/orders", methods=["GET"])
-@jwt_required()
-def get_user_orders():
-    """Hämtar alla ordrar för inloggad användare."""
-    user_id = get_jwt_identity()
-    orders = Orders.query.filter_by(user_id=user_id).order_by(Orders.created_at.desc()).all()
-
-    return jsonify([
-        {
-            "order_id": o.order_id,
-            "created_at": o.created_at.strftime("%Y-%m-%d %H:%M"),
-            "total_price": o.total_price,
-            "method": o.method,
-            "item_count": len(o.items)
-        }
-        for o in orders
-    ]), 200
