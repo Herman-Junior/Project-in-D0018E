@@ -42,7 +42,7 @@ def initiate_checkout(user_id, total_price, address_id):
 
     create_order_items(order.order_id, user_id)  # ← ersätter hela loopen
     db.session.commit()
-    return order
+    return Orders
 
 
 @orders_bp.route("/checkout", methods=["POST"])
@@ -91,9 +91,9 @@ def update_payment(order_id):
     if data["method"] not in ("card", "billing"):
         return jsonify({"error": "method must be card or billing"}), 400
 
-    order.method = data["method"]
-    order.payment_details = data.get("payment_details", "")
-    order.status = "confirmed"
+    Orders.method = data["method"]
+    Orders.payment_details = data.get("payment_details", "")
+    Orders.status = "confirmed"
     db.session.commit()
 
     return jsonify({"message": "Payment updated", "order": order.to_dict()}), 200
@@ -134,7 +134,7 @@ def cancel_order(order_id):
         if inventory:
             inventory.amount += item.quantity
 
-    order.status = "cancelled"
+    Orders.status = "cancelled"
     db.session.commit()
 
-    return jsonify({"message": "Order cancelled", "order": order.to_dict()}), 200
+    return jsonify({"message": "Orders cancelled", "Orders": Orders.to_dict()}), 200

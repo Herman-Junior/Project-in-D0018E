@@ -111,4 +111,17 @@ SELECT * FROM PRODUCTS;
 
 SELECT * FROM INVENTORY;
 
-Show TABLES;
+UPDATE USERS SET team = 1 WHERE email = 'admin@gmail.com';
+
+INSERT INTO USERS (username, email, password_hash, team)
+VALUES ('admin', 'admin@gmail.com', '$2b$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1);
+
+SELECT * FROM USERS WHERE email = 'admin@gmail.com';
+
+
+UPDATE USERS SET team = 1 WHERE email = 'admin@gmail.com';
+
+SELECT * FROM USERS WHERE email = 'admin@gmail.com';
+
+DELETE FROM USERS WHERE email = 'admin@gmail.com';
+

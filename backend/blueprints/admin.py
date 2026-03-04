@@ -1,14 +1,14 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from extensions import db
-from models import User, Products, Inventory
+from models import User, Products, Inventory, Cart
 
 admin_bp = Blueprint("admin", __name__)
 
 
 def admin_required():
     """Helper to check if the logged in user is an admin."""
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
     if not user or not user.team:
         return None, jsonify({"error": "Admin access required"}), 403
@@ -59,6 +59,10 @@ def change_price(product_id):
     if "price" not in data:
         return jsonify({"error": "Price is required"}), 400
 
+    # new - block negative or zero prices
+    if float(data["price"]) <= 0:
+        return jsonify({"error": "Price must be a positive number"}), 400
+
     product.price = data["price"]
     db.session.commit()
 
@@ -77,10 +81,22 @@ def remove_product(product_id):
     if not product:
         return jsonify({"error": "Product not found"}), 404
 
-    db.session.delete(product)
-    db.session.commit()
+    try:
+        # new - delete inventory first to avoid foreign key constraint error
+        inventory = Inventory.query.filter_by(product_id=product_id).first()
+        if inventory:
+            db.session.delete(inventory)
 
-    return jsonify({"message": "Product deleted"}), 200
+        # new - delete any cart items referencing this product
+        Cart.query.filter_by(product_id=product_id).delete()
+
+        db.session.delete(product)
+        db.session.commit()
+
+        return jsonify({"message": "Product deleted"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 400
 
 
 # --- TOGGLE PRODUCT VISIBILITY ---
@@ -118,7 +134,7 @@ def delete_user(user_id):
     if not target_user:
         return jsonify({"error": "User not found"}), 404
 
-    if target_user.is_admin:
+    if target_user.team:
         return jsonify({"error": "Cannot delete an admin user"}), 403
 
     db.session.delete(target_user)
@@ -139,7 +155,7 @@ def make_admin(user_id):
     if not target_user:
         return jsonify({"error": "User not found"}), 404
 
-    target_user.is_admin = True
+    target_user.team = True
     db.session.commit()
 
     return jsonify({"message": f"{target_user.username} is now an admin"}), 200
@@ -161,3 +177,40 @@ def view_inventory():
         "amount": item.amount,
         "unit_type": item.unit_type
     } for item in inventory]), 200
+
+
+# --- UPDATE OR CREATE INVENTORY FOR A PRODUCT ---
+@admin_bp.route("/inventory/<int:product_id>", methods=["PUT"])
+@jwt_required()
+def update_inventory(product_id):
+    user, err, status = admin_required()
+    if err:
+        return err, status
+
+    data = request.get_json()
+    amount = data.get("amount")
+    unit_type = data.get("unit_type", "st")
+
+    if amount is None:
+        return jsonify({"error": "amount is required"}), 400
+
+    product = Products.query.get(product_id)
+    if not product:
+        return jsonify({"error": "Product not found"}), 404
+
+    inventory = Inventory.query.filter_by(product_id=product_id).first()
+
+    if inventory:
+        inventory.amount = amount
+        inventory.unit_type = unit_type
+    else:
+        inventory = Inventory(product_id=product_id, amount=amount, unit_type=unit_type)
+        db.session.add(inventory)
+
+    db.session.commit()
+    return jsonify({
+        "message": "Inventory updated",
+        "product_id": product_id,
+        "amount": amount,
+        "unit_type": unit_type
+    }), 200
