@@ -64,7 +64,7 @@ const Product = () => {
   const deleteReview = async (review_id) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/reviews/${review_id}`, {
+      const response = await fetch(`/api/reviews/${review_id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

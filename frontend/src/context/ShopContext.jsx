@@ -72,16 +72,23 @@ export const ShopContextProvider = ({ children }) => {
             .catch(err => console.error('Fetch error:', err));
     }, []);
 
-    // new - fetch cart on load if logged in
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) return;
-        fetch('/api/cart', {  // ← byt till relativ sökväg
+        fetch('/api/cart', {  
             headers: { 'Authorization': `Bearer ${token}` }
         })
-            .then(res => res.json())
-            .then(data => { if (data.cart) setCartItems(data.cart); })
-            .catch(err => console.error('Cart fetch error:', err));
+            .then(res => {
+            if (res.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user_id');
+                setIsLoggedIn(false);
+                return;
+            }
+            return res.json();
+        })
+        .then(data => { if (data?.cart) setCartItems(data.cart); })
+        .catch(err => console.error('Cart fetch error:', err));
     }, [isLoggedIn]);
 
     const value = { products, currency, cartItems, isLoggedIn, setIsLoggedIn, addtoCart, removeFromCart, updateQuantity, logout, clearCart };
