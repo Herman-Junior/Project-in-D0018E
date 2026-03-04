@@ -12,6 +12,7 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True)
     team = db.Column(db.Boolean, default=False)
 
+
     addresses = db.relationship("Address", backref="user", lazy=True)
     orders = db.relationship("Orders", backref="user", lazy=True)
     cart_items = db.relationship("Cart", backref="user", lazy=True)
@@ -78,10 +79,13 @@ class Orders(db.Model):
     __tablename__ = "ORDERS"
     order_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("USERS.user_id"))
+    address_id = db.Column(db.Integer, db.ForeignKey("ADDRESS.address_id")) 
     method = db.Column(db.String(50))
     total_price = db.Column(db.Integer)
     payment_details = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     items = db.relationship("OrderItems", backref="order", lazy=True)
+    address = db.relationship("Address", lazy=True)
 
 class Cart(db.Model):
     __tablename__ = "CART"
@@ -96,6 +100,7 @@ class OrderItems(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey("ORDERS.order_id"))
     product_id = db.Column(db.Integer, db.ForeignKey("PRODUCTS.product_id"))
     quantity = db.Column(db.Float)
+    snapshot_price = db.Column(db.Integer, nullable=False)
 
 class Review(db.Model):
     __tablename__ = "REVIEW"
