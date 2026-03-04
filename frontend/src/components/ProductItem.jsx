@@ -18,7 +18,7 @@ const ProductItem = ({ product_id, name, price, image }) => { // NEW - fixed pro
         <p className='pt-0.5 text-sm font-medium'>{name}</p>
         <p className='text-sm font-bold'>{price} {currency}</p> {/* NEW - added currency */}
     </Link>
- )
+    )
 }
 
 export default ProductItem

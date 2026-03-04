@@ -11,7 +11,7 @@ class User(db.Model):
     password_hash = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(100), unique=True)
     team = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
     addresses = db.relationship("Address", backref="user", lazy=True)
     orders = db.relationship("Orders", backref="user", lazy=True)
@@ -66,7 +66,7 @@ class Products(db.Model):
             "price": self.price,
             "description": self.description,
             "is_public": self.is_public,
-            "image": "https://placehold.co/400"
+            "image": "https://placehold.co/400" 
         }
 
 class Inventory(db.Model):
@@ -79,10 +79,13 @@ class Orders(db.Model):
     __tablename__ = "ORDERS"
     order_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("USERS.user_id"))
+    address_id = db.Column(db.Integer, db.ForeignKey("ADDRESS.address_id")) 
     method = db.Column(db.String(50))
     total_price = db.Column(db.Integer)
     payment_details = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     items = db.relationship("OrderItems", backref="order", lazy=True)
+    address = db.relationship("Address", lazy=True)
 
     def to_dict(self):
         return {
@@ -107,6 +110,7 @@ class OrderItems(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey("ORDERS.order_id"))
     product_id = db.Column(db.Integer, db.ForeignKey("PRODUCTS.product_id"))
     quantity = db.Column(db.Float)
+    snapshot_price = db.Column(db.Integer, nullable=False)
     product = db.relationship("Products", lazy=True)
 
 class Review(db.Model):
@@ -116,4 +120,6 @@ class Review(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("USERS.user_id"))
     rating = db.Column(db.Integer)
     comment = db.Column(db.String(255))
+
+
 

@@ -1,6 +1,4 @@
--- Active: 1772115014074@@127.0.0.1@3306
-CREATE DATABASE IF NOT EXISTS MeetDatabase;
-USE MeetDatabase;-- Active: 1763569423496@@localhost@3306@meetdatabase
+-- Active: 1763569423496@@localhost@3306@meetdatabase
 CREATE DATABASE IF NOT EXISTS MeetDatabase;
 USE MeetDatabase;
 DROP DATABASE MeetDatabase;
@@ -162,7 +160,7 @@ CREATE TABLE PRODUCTS (
     FOREIGN KEY (category_id) REFERENCES CATEGORY(category_id)
 );
 
-DROP TABLE PRODUCTS;
+
 -- INVENTORY TABLE
 CREATE TABLE INVENTORY (
     product_id INT PRIMARY KEY,
@@ -188,6 +186,9 @@ CREATE TABLE ORDERS (
     method VARCHAR(50),
     total_price INT,
     payment_details VARCHAR(255),
+    created_at DATETIME DEFAULT NOW(),
+    address_id INT,
+    FOREIGN KEY (address_id) REFERENCES ADDRESS(address_id),
     FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
 
@@ -207,6 +208,7 @@ CREATE TABLE ORDER_ITEMS (
     order_id INT,
     product_id INT,
     quantity FLOAT,
+    snapshot_price INT NOT NULL DEFAULT 0,
     FOREIGN KEY (order_id) REFERENCES ORDERS(order_id),
     FOREIGN KEY (product_id) REFERENCES PRODUCTS(product_id)
 );
@@ -222,46 +224,28 @@ CREATE TABLE REVIEW (
     FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
 
-SELECT * FROM PRODUCTS;
-
-SELECT * FROM USERS;
-
-SELECT * FROM CART;
-
-USE MeetDatabase;
-
-
-DROP TABLE IF EXISTS ORDER_ITEMS;
-DROP TABLE IF EXISTS CART;
-DROP TABLE IF EXISTS ORDERS;
-DROP TABLE IF EXISTS REVIEW;
-DROP TABLE IF EXISTS ADDRESS;
-DROP TABLE IF EXISTS INVENTORY;
-DROP TABLE IF EXISTS PRODUCTS;
-DROP TABLE IF EXISTS CATEGORY;
-DROP TABLE IF EXISTS USERS;
-
-
 SHOW TABLES;
 
 SELECT * FROM PRODUCTS;
-USE MeetDatabase;
--- Create category first
+SELECT * FROM CATEGORY;
 
--- Add products
-INSERT INTO PRODUCTS (name, price, description, category_id) 
-VALUES ('Delue Board', 120, 'Premium Selection', 1);
+SELECT * FROM INVENTORY;
+
+
 
 INSERT INTO CATEGORY (category_name) 
-VALUES ('Boards') 
-ON DUPLICATE KEY UPDATE category_name='Boards';
+VALUES ('meat') 
+ON DUPLICATE KEY UPDATE category_name='meat';
 
 -- 3. Lägg in en produkt
 INSERT INTO PRODUCTS (category_id, name, price, description) 
-VALUES (1, 'Delue Board', 599, 'Premium selection of meats for the discerning palate.');
+VALUES (3, 'met', 4434, 'meat plate.');
 
 -- 4. Lägg in lagersaldo (valfritt, men bra för din Inventory-relation)
 INSERT INTO INVENTORY (product_id, amount, unit_type) 
-VALUES (LAST_INSERT_ID(), 50, 'st');
+VALUES (1, 50, 'st');
 
 DROP DATABASE MeetDatabase;
+
+
+SELECT * FROM USERS;

@@ -13,26 +13,33 @@ def create_app():
 
     db.init_app(app)
     bcrypt.init_app(app)
-    # NEW - Explicitly allow the frontend port
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+
+    CORS(app)
     JWTManager(app)
 
     with app.app_context():
         from models import User, Products, Category 
         db.create_all()
 
-    #from blueprints.inventory import inventory_bp
-    #from blueprints.inventory import inventory_bp
+
+    from blueprints.admin import admin_bp
+    from blueprints.inventory import inventory_bp
     from blueprints.auth import auth_bp
     from blueprints.products import products_bp
+    from blueprints.cart import cart_bp
+    from blueprints.order_items import order_items_bp
+    from blueprints.category import category_bp
+    from blueprints.review import review_bp
+    from blueprints.address import address_bp
+
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(products_bp, url_prefix="/api")
-    #app.register_blueprint(inventory_bp, url_prefix="/api")
-    #app.register_blueprint(inventory_bp, url_prefix="/api")
-    from blueprints.admin import admin_bp
+    app.register_blueprint(cart_bp, url_prefix="/api")
+    app.register_blueprint(inventory_bp, url_prefix="/api")
     app.register_blueprint(admin_bp, url_prefix="/api/admin")
     from blueprints.orders import orders_bp
     app.register_blueprint(orders_bp, url_prefix="/api/orders")
+
 
     return app
 
@@ -41,3 +48,5 @@ app = create_app()
 if __name__ == "__main__":
     app = create_app()
     app.run(debug=True, port=5000)
+
+    
