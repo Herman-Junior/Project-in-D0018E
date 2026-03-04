@@ -28,13 +28,13 @@ def create_order_items(order_id, user_id):
 
 def render_checkout_success(order_id):
     """Bygger success-response med kvittodata."""
-    order = Orders.query.get(order_id)
+    order = Orders.query.filter_by(order_id=order_id).first()
     if not order:
         return None
 
     items_list = []
     for item in order.items:
-        product = Products.query.get(item.product_id)
+        product = Products.query.filter_by(product_id=item.product_id).first()
         items_list.append({
             "product_id": item.product_id,
             "name": product.name if product else "unknown product",

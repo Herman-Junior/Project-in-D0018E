@@ -94,13 +94,15 @@ def get_reviews(product_id):
 @review_bp.route("/reviews/<int:review_id>", methods=["DELETE"])
 @jwt_required()
 def delete_review(review_id):
-    """Kunden kan bara ta bort sina egna reviews."""
     user_id = get_jwt_identity()
 
     review = Review.query.filter_by(
         review_id=review_id,
-        user_id=user_id        # ← säkerställer att det är kundens egen review
+        user_id=user_id
     ).first()
+
+    if not review:
+        return jsonify({"error": "Review not found or not yours"}), 404
 
     db.session.delete(review)
     db.session.commit()
