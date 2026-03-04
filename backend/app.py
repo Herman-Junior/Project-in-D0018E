@@ -31,14 +31,19 @@ def create_app():
     from blueprints.category import category_bp
     from blueprints.review import review_bp
     from blueprints.address import address_bp
+    from blueprints.orders import orders_bp
+
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(products_bp, url_prefix="/api")
     app.register_blueprint(cart_bp, url_prefix="/api")
     app.register_blueprint(inventory_bp, url_prefix="/api")
     app.register_blueprint(admin_bp, url_prefix="/api/admin")
-    from blueprints.orders import orders_bp
     app.register_blueprint(orders_bp, url_prefix="/api/orders")
+    app.register_blueprint(category_bp, url_prefix="/api")
+    app.register_blueprint(review_bp, url_prefix="/api")
+    app.register_blueprint(address_bp, url_prefix="/api")
+    app.register_blueprint(order_items_bp, url_prefix="/api")
 
 
     return app
