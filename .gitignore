@@ -1,0 +1,9 @@
+
+.venv/
+temp_reqs.txt
+node_modules/
+__pycache__/
+*.pyc
+.env
+*.env
+.DS_Store

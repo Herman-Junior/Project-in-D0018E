@@ -1,15 +1,3 @@
-# NEW - Blueprint for product routes
-from flask import Blueprint, jsonify
-from models import Products
-
-products_bp = Blueprint("products", __name__)
-
-# NEW - Route to get all products from the database
-@products_bp.route("/products", methods=["GET"])
-def get_products():
-    products = Products.query.all()
-    return jsonify([p.to_dict() for p in products]), 200
-
 from flask import Blueprint, request, jsonify
 from extensions import db
 from models import Products

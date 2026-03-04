@@ -39,22 +39,17 @@ def cart_response(user_id):
 @jwt_required()
 def view_cart():
     try: 
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         return jsonify(cart_response(user_id)), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
-
-def updatecart(user_id):
-    return cart_response(user_id)
 
 
 @cart_bp.route("/cart/add", methods=["POST"])
 @jwt_required()
 def add_to_cart():
     """Lägger till produkt eller ökar antal om den redan finns."""
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     data = request.get_json()
     product_id = data.get("product_id")
     quantity = data.get("quantity", 1)

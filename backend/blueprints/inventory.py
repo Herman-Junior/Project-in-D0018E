@@ -28,6 +28,13 @@ def get_full_inventory():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+def apply_inventory_change(product_id, amount_delta):
+    """Minskar lagersaldo med amount_delta. Används vid köp."""
+    stock = db.session.get(Inventory, product_id)
+    if stock:
+        stock.amount = max(0, stock.amount - amount_delta)
+
 @inventory_bp.route("/admin/inventory/<int:product_id>", methods=["PUT"])
 def update_inventory(product_id):
     try:
