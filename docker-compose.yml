@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+
+  db:
+    image: mysql:8.0
+    container_name: meetdb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./MeetDB.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: flask_backend
+    restart: always
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      FLASK_ENV: production
+    # Use this corrected command:
+    command: > 
+      sh -c "sleep 10 && gunicorn -w 2 -b 0.0.0.0:5000 app:app"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    container_name: react_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
