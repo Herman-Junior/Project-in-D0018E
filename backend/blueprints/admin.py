@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from extensions import db
-from models import User, Products, Inventory, Cart
+from models import User, Products, Inventory, Cart, Orders
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -59,7 +59,6 @@ def change_price(product_id):
     if "price" not in data:
         return jsonify({"error": "Price is required"}), 400
 
-    # new - block negative or zero prices
     if float(data["price"]) <= 0:
         return jsonify({"error": "Price must be a positive number"}), 400
 
@@ -82,12 +81,10 @@ def remove_product(product_id):
         return jsonify({"error": "Product not found"}), 404
 
     try:
-        # new - delete inventory first to avoid foreign key constraint error
         inventory = Inventory.query.filter_by(product_id=product_id).first()
         if inventory:
             db.session.delete(inventory)
 
-        # new - delete any cart items referencing this product
         Cart.query.filter_by(product_id=product_id).delete()
 
         db.session.delete(product)
@@ -214,3 +211,70 @@ def update_inventory(product_id):
         "amount": amount,
         "unit_type": unit_type
     }), 200
+
+
+# --- GET ALL ORDERS with customer info and items ---
+@admin_bp.route("/orders", methods=["GET"])
+@jwt_required()
+def get_all_orders():
+    user, err, status = admin_required()
+    if err:
+        return err, status
+
+    orders = Orders.query.order_by(Orders.order_id.desc()).all()
+    result = []
+    for order in orders:
+        result.append({
+            "order_id": order.order_id,
+            "total_price": order.total_price,
+            "method": order.method,
+            "status": getattr(order, 'status', 'N/A'),
+            "payment_details": order.payment_details,
+            "user": {
+                "user_id": order.user.user_id,
+                "username": order.user.username,
+                "email": order.user.email
+            } if order.user else None,
+            "items": [{
+                "order_item_id": item.order_item_id,
+                "product_name": item.product.name if item.product else "Deleted product",
+                "quantity": item.quantity,
+                "snapshot_price": item.snapshot_price
+            } for item in order.items]
+        })
+    return jsonify(result), 200
+
+
+# --- GET ALL USERS with account info ---
+@admin_bp.route("/users", methods=["GET"])
+@jwt_required()
+def get_all_users():
+    user, err, status = admin_required()
+    if err:
+        return err, status
+
+    users = User.query.order_by(User.user_id.asc()).all()
+    return jsonify([{
+        "user_id": u.user_id,
+        "username": u.username,
+        "email": u.email,
+        "team": u.team,
+        "order_count": len(u.orders)
+    } for u in users]), 200
+
+
+# new - GET ALL PRODUCTS including hidden ones for admin view
+@admin_bp.route("/products", methods=["GET"])
+@jwt_required()
+def get_all_products():
+    user, err, status = admin_required()
+    if err:
+        return err, status
+
+    products = Products.query.all()
+    result = []
+    for p in products:
+        d = p.to_dict()
+        d["stock"] = p.inventory.amount if p.inventory else 0
+        result.append(d)
+    return jsonify(result), 200

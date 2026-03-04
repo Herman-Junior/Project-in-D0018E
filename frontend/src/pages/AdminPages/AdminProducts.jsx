@@ -4,21 +4,24 @@ const BASE = "http://127.0.0.1:5000";
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]); // new - load from database
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [formData, setFormData] = useState({
     name: "", description: "", price: "", category_id: "", stock: "", unit_type: "st", is_public: true
   });
-  const [priceError, setPriceError] = useState(""); // new - price validation
+  const [priceError, setPriceError] = useState("");
 
   const token = localStorage.getItem("token");
 
   const loadProducts = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${BASE}/api/products`);
+      // new - fetch from admin endpoint to see ALL products including hidden
+      const res = await fetch(`${BASE}/api/admin/products`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
       const data = await res.json();
       setProducts(data);
     } catch (err) {
@@ -28,7 +31,6 @@ const AdminProducts = () => {
     }
   };
 
-  // new - load categories from database
   const loadCategories = async () => {
     try {
       const res = await fetch(`${BASE}/api/categories`);
@@ -41,7 +43,7 @@ const AdminProducts = () => {
 
   useEffect(() => {
     loadProducts();
-    loadCategories(); // new
+    loadCategories();
   }, []);
 
   const openAdd = () => {
@@ -66,7 +68,6 @@ const AdminProducts = () => {
     setIsModalOpen(true);
   };
 
-  // new - validate price is positive
   const handlePriceChange = (e) => {
     const val = e.target.value;
     if (val < 0) {
@@ -80,7 +81,6 @@ const AdminProducts = () => {
   const handleSave = async (e) => {
     e.preventDefault();
 
-    // new - block submit if price invalid
     if (parseFloat(formData.price) <= 0 || formData.price === "") {
       setPriceError("Price must be a positive number");
       return;
@@ -139,7 +139,6 @@ const AdminProducts = () => {
     }
   };
 
-  // new - delete product from database
   const handleDelete = async (product_id) => {
     if (!window.confirm("Are you sure you want to delete this product? This cannot be undone.")) return;
     try {
@@ -187,7 +186,11 @@ const AdminProducts = () => {
                 <div>
                   <p className="font-bold uppercase text-sm" style={{ color: '#5C1A1B' }}>{p.name}</p>
                   <p className="text-xs opacity-60" style={{ color: '#5C1A1B' }}>
-                    {p.price} EUR — Stock: {p.stock ?? 0} — {p.is_public ? "Public" : "Hidden"}
+                    {p.price} EUR — Stock: {p.stock ?? 0} —
+                    {/* new - show hidden badge for non-public products */}
+                    <span style={{ color: p.is_public ? 'green' : 'red' }}>
+                      {p.is_public ? " Public" : " Hidden"}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -198,7 +201,6 @@ const AdminProducts = () => {
                   style={{ color: '#5C1A1B', borderColor: '#5C1A1B' }}>
                   Edit
                 </button>
-                {/* new - delete button removes from database */}
                 <button onClick={() => handleDelete(p.product_id)}
                   className="text-xs font-bold uppercase px-3 py-1 bg-red-700 text-white hover:bg-red-900 transition-all">
                   Delete
@@ -238,13 +240,12 @@ const AdminProducts = () => {
                     className="border p-2 text-sm h-20 outline-none bg-transparent"
                     style={{ borderColor: '#5C1A1B', color: '#5C1A1B' }} />
 
-                  {/* new - category dropdown from database */}
+                  {/* category dropdown from database */}
                   <div className="flex flex-col gap-1">
                     <label className="text-[10px] uppercase font-bold opacity-60" style={{ color: '#5C1A1B' }}>
                       Category
                     </label>
-                    <select
-                      required
+                    <select required
                       value={formData.category_id}
                       onChange={e => setFormData({ ...formData, category_id: e.target.value })}
                       className="border-b p-2 text-sm outline-none bg-transparent uppercase tracking-widest"
@@ -260,7 +261,6 @@ const AdminProducts = () => {
                 </>
               )}
 
-              {/* new - price with positive number validation */}
               <div className="flex flex-col gap-1">
                 <input type="number" placeholder="PRICE (EUR)" required min="0.01" step="0.01"
                   value={formData.price}
@@ -284,6 +284,7 @@ const AdminProducts = () => {
                 className="border-b p-2 text-sm outline-none uppercase tracking-widest bg-transparent"
                 style={{ borderColor: '#5C1A1B', color: '#5C1A1B' }} />
 
+              {/* new - visibility checkbox, hidden products only visible to admin */}
               <label className="flex items-center gap-2 text-xs uppercase tracking-widest cursor-pointer"
                 style={{ color: '#5C1A1B' }}>
                 <input type="checkbox" checked={formData.is_public}

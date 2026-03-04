@@ -1,42 +1,44 @@
 import React, { useState } from "react";
-import AdminOrders from "./AdminOrders";
 import AdminProducts from "./AdminProducts";
+import AdminOrders from "./AdminOrders";
 import AdminUsers from "./AdminUsers";
+
+const tabs = [
+    { key: "products", label: "Manage Products" },
+    { key: "orders", label: "All Orders" },
+    { key: "users", label: "Customers" },
+    ];
 
     const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState("products");
 
     return (
-        <div className="flex min-h-[80vh] -mx-4">
+        <div className="min-h-[80vh] -mx-4">
 
-        {/* SIDEBAR */}
-        <div className="w-48 sm:w-56 p-6 flex flex-col gap-4"
-            style={{ backgroundColor: '#5C1A1B' }}>
-            <h2 className="text-sm font-bold uppercase tracking-widest mb-6 text-white">
-            Admin Panel
-            </h2>
+        {/* HEADER */}
+        <div className="px-8 py-4" style={{ backgroundColor: '#5C1A1B' }}>
+            <p className="text-white text-xs uppercase tracking-widest opacity-60 mb-1">Meet 4 Meat</p>
+            <h1 className="text-white font-bold uppercase tracking-widest text-xl">Admin Panel</h1>
+        </div>
 
-            <button onClick={() => setActiveTab("products")}
-            className="text-left text-xs uppercase tracking-widest py-2 transition-all"
-            style={{ color: activeTab === "products" ? '#f5c07a' : 'rgba(255,255,255,0.7)' }}>
-            Manage Products
+        {/* TAB BAR */}
+        <div className="flex border-b" style={{ borderColor: '#5C1A1B' }}>
+            {tabs.map(tab => (
+            <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className="px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all border-b-2"
+                style={{
+                borderColor: activeTab === tab.key ? '#5C1A1B' : 'transparent',
+                color: activeTab === tab.key ? '#5C1A1B' : '#aaa',
+                }}>
+                {tab.label}
             </button>
-
-            <button onClick={() => setActiveTab("orders")}
-            className="text-left text-xs uppercase tracking-widest py-2 transition-all"
-            style={{ color: activeTab === "orders" ? '#f5c07a' : 'rgba(255,255,255,0.7)' }}>
-            All Orders
-            </button>
-
-            <button onClick={() => setActiveTab("users")}
-            className="text-left text-xs uppercase tracking-widest py-2 transition-all"
-            style={{ color: activeTab === "users" ? '#f5c07a' : 'rgba(255,255,255,0.7)' }}>
-            Customers
-            </button>
+            ))}
         </div>
 
         {/* CONTENT */}
-        <div className="flex-1 p-8 bg-white">
+        <div className="p-8">
             {activeTab === "products" && <AdminProducts />}
             {activeTab === "orders" && <AdminOrders />}
             {activeTab === "users" && <AdminUsers />}
