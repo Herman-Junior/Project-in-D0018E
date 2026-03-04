@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ShopContext } from '../context/ShopContext';
 
 const Login = () => {
   const [currentState, setCurrentState] = useState('Login');
@@ -14,6 +15,7 @@ const Login = () => {
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const navigate = useNavigate();
+  const { setIsLoggedIn } = useContext(ShopContext); // new
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -61,6 +63,7 @@ const Login = () => {
         if (response.ok) {
           localStorage.setItem('token', data.token);
           localStorage.setItem('user_id', data.user.user_id);
+          setIsLoggedIn(true); // new
           navigate('/');
         } else {
           setErrorMessage(data.error || 'Wrong email or password');
@@ -77,13 +80,12 @@ const Login = () => {
   return (
     <form onSubmit={handleSubmit} className='flex flex-col items-center w-[90%] sm:max-w-96 m-auto mt-14 gap-4 text-(--main-text-color)'>
 
-       {/* HEADER */}
+      {/* HEADER */}
       <div className='inline-flex items-center gap-2 mb-10 mt-10'>
         <hr className='border-none h-[1.5px] w-8' style={{ backgroundColor: '#6f1811' }} />
         <p className='text-3xl uppercase font-semibold tracking-tighter' style={{ color: '#6f1811' }}>{currentState}</p>
         <hr className='border-none h-[1.5px] w-8' style={{ backgroundColor: '#6f1811' }} />
       </div>
-
 
       {currentState === 'Sign Up' && (
         <input
@@ -121,7 +123,6 @@ const Login = () => {
           : <p onClick={() => setCurrentState('Login')} className='cursor-pointer font-bold' style={{ color: '#6f1811' }}>Login</p>
         }
       </div>
-
 
       {errorMessage && (
         <p className="text-red-500 text-sm uppercase tracking-widest text-center">{errorMessage}</p>
