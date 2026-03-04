@@ -1,23 +1,31 @@
--- Active: 1771429691299@@127.0.0.1@3306@MeetDatabase
-    CREATE DATABASE IF NOT EXISTS MeetDatabase;
+CREATE DATABASE IF NOT EXISTS MeetDatabase;
     USE MeetDatabase;
 
--- CATEGORY TABLE
-CREATE TABLE CATEGORY (
-    category_id INT PRIMARY KEY AUTO_INCREMENT,
-    category_name VARCHAR(50) UNIQUE
-);
+    -- USERS TABLE
+    CREATE TABLE USERS (
+        user_id INT PRIMARY KEY AUTO_INCREMENT,
+        username VARCHAR(50) NOT NULL UNIQUE,
+        password_hash VARCHAR(200) NOT NULL,
+        email VARCHAR(100) UNIQUE,
+        team BOOLEAN
+    );
 
--- PRODUCTS TABLE
-CREATE TABLE PRODUCTS (
-    product_id INT PRIMARY KEY AUTO_INCREMENT,
-    category_id INT,
-    name VARCHAR(100) UNIQUE,
-    price INT,
-    description VARCHAR(255),
-    is_public BOOLEAN DEFAULT 1,
-    FOREIGN KEY (category_id) REFERENCES CATEGORY(category_id)
-);
+    -- CATEGORY TABLE
+    CREATE TABLE CATEGORY (
+        category_id INT PRIMARY KEY AUTO_INCREMENT,
+        category_name VARCHAR(50) UNIQUE
+    );
+
+    -- PRODUCTS TABLE
+    CREATE TABLE PRODUCTS (
+        product_id INT PRIMARY KEY AUTO_INCREMENT,
+        category_id INT,
+        name VARCHAR(100) UNIQUE,
+        price INT,
+        description VARCHAR(255),
+        is_public BOOLEAN DEFAULT 1,
+        FOREIGN KEY (category_id) REFERENCES CATEGORY(category_id)
+    );
 
 
     -- INVENTORY TABLE
@@ -100,3 +108,18 @@ SELECT * FROM CATEGORY;
 SELECT * FROM PRODUCTS;
 
 SELECT * FROM INVENTORY;
+
+UPDATE USERS SET team = 1 WHERE email = 'admin@gmail.com';
+
+INSERT INTO USERS (username, email, password_hash, team)
+VALUES ('admin', 'admin@gmail.com', '$2b$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1);
+
+SELECT * FROM USERS WHERE email = 'admin@gmail.com';
+
+
+UPDATE USERS SET team = 1 WHERE email = 'admin@gmail.com';
+
+SELECT * FROM USERS WHERE email = 'admin@gmail.com';
+
+DELETE FROM USERS WHERE email = 'admin@gmail.com';
+

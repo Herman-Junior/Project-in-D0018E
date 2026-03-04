@@ -28,7 +28,7 @@ def register():
     user = User(
         username=data["username"],
         email=data["email"],
-        team=data.get("team", False)
+        team=False  # new - never allow admin creation via register
     )
     user.set_password(data["password"])
 
@@ -51,7 +51,11 @@ def login():
     if not user or not user.check_password(data["password"]):
         return jsonify({"error": "Invalid email or password"}), 401
 
-    token = create_access_token(identity=str(user.user_id))
+    # new - include is_admin in token so frontend AdminRoute and Profile can check it
+    token = create_access_token(
+        identity=str(user.user_id),
+        additional_claims={"is_admin": bool(user.team)}
+    )
 
     return jsonify({
         "message": "Login successful",
@@ -87,13 +91,13 @@ def edit_profile():
     # Only update fields that were actually sent
     if "username" in data:
         existing = User.query.filter_by(username=data["username"]).first()
-        if existing and existing.user_id != user_id:
+        if existing and existing.user_id != int(user_id):
             return jsonify({"error": "Username already taken"}), 409
         user.username = data["username"]
 
     if "email" in data:
         existing = User.query.filter_by(email=data["email"]).first()
-        if existing and existing.user_id != user_id:
+        if existing and existing.user_id != int(user_id):
             return jsonify({"error": "Email already registered"}), 409
         user.email = data["email"]
 
