@@ -65,8 +65,13 @@ def add_to_cart():
         item = Cart(user_id=user_id, product_id=product_id, quantity=quantity)
         db.session.add(item)
 
-    db.session.commit()
-    return jsonify(cart_response(user_id)), 200
+    try:
+        db.session.commit()
+        return jsonify(cart_response(user_id)), 200
+    except Exception as e:
+        db.session.rollback()
+    return jsonify({"error": "Product not found or unavailable"}), 400
+
 
 
 @cart_bp.route("/cart/remove", methods=["PUT"])

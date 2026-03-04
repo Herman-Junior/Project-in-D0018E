@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from extensions import db
-from models import User, Cart, Products, Inventory, Order, OrderItem
+from models import Cart, Inventory, Orders, OrderItems
+from blueprints.order_items import create_order_items, render_checkout_success
 
 orders_bp = Blueprint("orders", __name__)
 
@@ -21,7 +22,7 @@ def validate_cart_items(cart_items):
     return errors
 
 
-def initiate_checkout(user_id, total_price):
+def initiate_checkout(user_id, total_price, address_id):
     cart_items = Cart.query.filter_by(user_id=user_id).all()
     if not cart_items:
         raise ValueError("Cart is empty")
@@ -30,17 +31,16 @@ def initiate_checkout(user_id, total_price):
     if errors:
         raise ValueError(errors)
 
-    order = Order(user_id=user_id, total_price=total_price, status="pending")
+    order = Orders(
+        user_id=user_id,
+        total_price=total_price,
+        address_id=address_id,  # ← från frontend
+        status="pending"
+    )
     db.session.add(order)
     db.session.flush()
 
-    for item in cart_items:
-        order_item = OrderItem(order_id=order.order_id, product_id=item.product_id, quantity=item.quantity)
-        db.session.add(order_item)
-        inventory = Inventory.query.filter_by(product_id=item.product_id).first()
-        inventory.amount -= item.quantity
-
-    Cart.query.filter_by(user_id=user_id).delete()
+    create_order_items(order.order_id, user_id)  # ← ersätter hela loopen
     db.session.commit()
     return order
 
@@ -49,6 +49,12 @@ def initiate_checkout(user_id, total_price):
 @jwt_required()
 def checkout():
     user_id = get_jwt_identity()
+    data = request.get_json() or {}
+    address_id = data.get("address_id")
+
+    if not address_id:
+        return jsonify({"error": "address_id is required"}), 400
+
     cart_items = Cart.query.filter_by(user_id=user_id).all()
     if not cart_items:
         return jsonify({"error": "Your cart is empty"}), 400
@@ -56,7 +62,7 @@ def checkout():
     total_price = sum(item.quantity * item.product.price for item in cart_items if item.product)
 
     try:
-        order = initiate_checkout(user_id, total_price)
+        order = initiate_checkout(user_id, total_price, address_id)
     except ValueError as e:
         error = e.args[0]
         if isinstance(error, list):
@@ -66,14 +72,14 @@ def checkout():
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-    return jsonify({"message": "Order created successfully", "order": order.to_dict()}), 201
+    return jsonify(render_checkout_success(order.order_id)), 201
 
 
 @orders_bp.route("/<int:order_id>/payment", methods=["PUT"])
 @jwt_required()
 def update_payment(order_id):
     user_id = get_jwt_identity()
-    order = Order.query.filter_by(order_id=order_id, user_id=user_id).first()
+    order = Orders.query.filter_by(order_id=order_id, user_id=user_id).first()
     if not order:
         return jsonify({"error": "Order not found"}), 404
     if order.status == "cancelled":
@@ -90,40 +96,32 @@ def update_payment(order_id):
     order.status = "confirmed"
     db.session.commit()
 
-    return jsonify({"message": "Payment method updated", "order": order.to_dict()}), 200
+    return jsonify({"message": "Payment updated", "order": order.to_dict()}), 200
 
 
 @orders_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_orders():
     user_id = get_jwt_identity()
-    orders = Order.query.filter_by(user_id=user_id).all()
-    return jsonify([order.to_dict() for order in orders]), 200
-
-
-@orders_bp.route("/<int:order_id>", methods=["GET"])
-@jwt_required()
-def get_order(order_id):
-    user_id = get_jwt_identity()
-    order = Order.query.filter_by(order_id=order_id, user_id=user_id).first()
-    if not order:
-        return jsonify({"error": "Order not found"}), 404
-
-    items = [{
-        "product_id": item.product_id,
-        "product_name": item.product.name if item.product else None,
-        "quantity": item.quantity,
-        "price": item.product.price if item.product else None,
-    } for item in order.items]
-
-    return jsonify({**order.to_dict(), "items": items}), 200
+    orders = Orders.query.filter_by(user_id=user_id).order_by(Orders.created_at.desc()).all()
+    return jsonify([
+        {
+            "order_id": o.order_id,
+            "created_at": o.created_at.strftime("%Y-%m-%d %H:%M"),
+            "total_price": o.total_price,
+            "method": o.method,
+            "status": o.status,
+            "item_count": len(o.items)
+        }
+        for o in orders
+    ]), 200
 
 
 @orders_bp.route("/<int:order_id>/cancel", methods=["PUT"])
 @jwt_required()
 def cancel_order(order_id):
     user_id = get_jwt_identity()
-    order = Order.query.filter_by(order_id=order_id, user_id=user_id).first()
+    order = Orders.query.filter_by(order_id=order_id, user_id=user_id).first()
     if not order:
         return jsonify({"error": "Order not found"}), 404
     if order.status in ("shipped", "delivered"):

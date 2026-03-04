@@ -15,6 +15,8 @@ export const ShopContextProvider = ({ children }) => {
         setCartItems([]);
     };
 
+    const clearCart = () => setCartItems([]);
+
     const addtoCart = async (product_id) => {
         const token = localStorage.getItem('token');
         if (!token) { alert("You need to be logged in to add items to cart."); return; }
@@ -74,7 +76,7 @@ export const ShopContextProvider = ({ children }) => {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) return;
-        fetch('http://127.0.0.1:5000/api/cart', {
+        fetch('/api/cart', {  // ← byt till relativ sökväg
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.json())
@@ -82,7 +84,7 @@ export const ShopContextProvider = ({ children }) => {
             .catch(err => console.error('Cart fetch error:', err));
     }, [isLoggedIn]);
 
-    const value = { products, currency, cartItems, isLoggedIn, setIsLoggedIn, addtoCart, removeFromCart, updateQuantity, logout };
+    const value = { products, currency, cartItems, isLoggedIn, setIsLoggedIn, addtoCart, removeFromCart, updateQuantity, logout, clearCart };
 
     return (
         <ShopContext.Provider value={value}>

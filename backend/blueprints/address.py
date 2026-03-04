@@ -9,7 +9,7 @@ address_bp = Blueprint("address", __name__)
 
 def validate_address(data):
     """Validerar att alla adressfält finns och inte är tomma."""
-    required_fields = ["country", "state", "city"]
+    required_fields = ["country", "city", "address"]
     for field in required_fields:
         if not data.get(field):
             return False, f"{field} is required"
@@ -29,8 +29,8 @@ def add_address():
     address = Address(
         user_id=user_id,
         country=data.get("country"),
-        state=data.get("state"),
-        city=data.get("city")
+        city=data.get("city"),
+        address=data.get("address")
     )
     db.session.add(address)
     db.session.commit()
@@ -52,8 +52,8 @@ def get_addresses():
         {
             "address_id": a.address_id,
             "country": a.country,
-            "state": a.state,
-            "city": a.city
+            "city": a.city,
+            "address": a.address
         }
         for a in addresses
     ]), 200

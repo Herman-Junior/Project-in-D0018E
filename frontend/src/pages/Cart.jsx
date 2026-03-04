@@ -106,7 +106,7 @@ const Cart = () => {
               </div>
 
               <button
-                onClick={() => navigate('/placeorder')}
+                onClick={() => navigate('/place-order')}
                 className='w-full py-3 text-sm font-bold uppercase tracking-widest transition-all active:scale-[0.98] hover:opacity-80 mt-1'
                 style={{ backgroundColor: '#5C1A1B', color: '#fff' }}>
                 Proceed to Checkout
