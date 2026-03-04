@@ -143,41 +143,41 @@ CREATE TABLE USERS (
     team BOOLEAN
 );
 
--- CATEGORY TABLE
-CREATE TABLE CATEGORY (
-    category_id INT PRIMARY KEY AUTO_INCREMENT,
-    category_name VARCHAR(50) UNIQUE
-);
+    -- CATEGORY TABLE
+    CREATE TABLE CATEGORY (
+        category_id INT PRIMARY KEY AUTO_INCREMENT,
+        category_name VARCHAR(50) UNIQUE
+    );
 
--- PRODUCTS TABLE
-CREATE TABLE PRODUCTS (
-    product_id INT PRIMARY KEY AUTO_INCREMENT,
-    category_id INT,
-    name VARCHAR(100) UNIQUE,
-    price INT,
-    description VARCHAR(255),
-    is_public BOOLEAN DEFAULT 1,
-    FOREIGN KEY (category_id) REFERENCES CATEGORY(category_id)
-);
+    -- PRODUCTS TABLE
+    CREATE TABLE PRODUCTS (
+        product_id INT PRIMARY KEY AUTO_INCREMENT,
+        category_id INT,
+        name VARCHAR(100) UNIQUE,
+        price INT,
+        description VARCHAR(255),
+        is_public BOOLEAN DEFAULT 1,
+        FOREIGN KEY (category_id) REFERENCES CATEGORY(category_id)
+    );
 
 
--- INVENTORY TABLE
-CREATE TABLE INVENTORY (
-    product_id INT PRIMARY KEY,
-    amount FLOAT,
-    unit_type VARCHAR(50),
-    FOREIGN KEY (product_id) REFERENCES PRODUCTS(product_id)
-);
+    -- INVENTORY TABLE
+    CREATE TABLE INVENTORY (
+        product_id INT PRIMARY KEY,
+        amount FLOAT,
+        unit_type VARCHAR(50),
+        FOREIGN KEY (product_id) REFERENCES PRODUCTS(product_id)
+    );
 
--- ADDRESS TABLE
-CREATE TABLE ADDRESS (
-    address_id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT,
-    country VARCHAR(100),
-    state VARCHAR(100),
-    city VARCHAR(100),
-    FOREIGN KEY (user_id) REFERENCES USERS(user_id)
-);
+    -- ADDRESS TABLE
+    CREATE TABLE ADDRESS (
+        address_id INT PRIMARY KEY AUTO_INCREMENT,
+        user_id INT,
+        country VARCHAR(100),
+        state VARCHAR(100),
+        city VARCHAR(100),
+        FOREIGN KEY (user_id) REFERENCES USERS(user_id)
+    );
 
 -- ORDER TABLE
 CREATE TABLE ORDERS (
@@ -224,28 +224,20 @@ CREATE TABLE REVIEW (
     FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
 
-SHOW TABLES;
-
-SELECT * FROM PRODUCTS;
-SELECT * FROM CATEGORY;
-
-SELECT * FROM INVENTORY;
-
-
-
 INSERT INTO CATEGORY (category_name) 
-VALUES ('meat') 
+VALUES ('Salami') 
 ON DUPLICATE KEY UPDATE category_name='meat';
 
 -- 3. Lägg in en produkt
 INSERT INTO PRODUCTS (category_id, name, price, description) 
-VALUES (3, 'met', 4434, 'meat plate.');
+VALUES (3, 'Pruscutto', 4434, 'meat plate.');
 
 -- 4. Lägg in lagersaldo (valfritt, men bra för din Inventory-relation)
 INSERT INTO INVENTORY (product_id, amount, unit_type) 
-VALUES (1, 50, 'st');
+VALUES (7, 50, 'st');
 
-DROP DATABASE MeetDatabase;
+SELECT * FROM CATEGORY;
 
+SELECT * FROM PRODUCTS;
 
-SELECT * FROM USERS;
+SELECT * FROM INVENTORY;
