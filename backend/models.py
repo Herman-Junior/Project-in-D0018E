@@ -110,6 +110,7 @@ class OrderItems(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey("PRODUCTS.product_id"))
     quantity = db.Column(db.Float)
     snapshot_price = db.Column(db.Integer, nullable=False)
+    product = db.relationship("Products", lazy=True)
 
 class Review(db.Model):
     __tablename__ = "REVIEW"
