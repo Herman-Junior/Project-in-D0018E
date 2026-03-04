@@ -86,9 +86,16 @@ class Orders(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     items = db.relationship("OrderItems", backref="order", lazy=True)
     address = db.relationship("Address", lazy=True)
-
-
-
+       
+    def to_dict(self):
+        return {
+            "order_id": self.order_id,
+            "user_id": self.user_id,
+            "status": self.status,
+            "total_price": self.total_price,
+            "method": self.method,
+            "payment_details": self.payment_details,
+        }
 class Cart(db.Model):
     __tablename__ = "CART"
     cart_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
