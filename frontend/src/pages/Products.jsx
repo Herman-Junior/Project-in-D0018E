@@ -61,7 +61,7 @@ const Products = () => {
 
       {/* RIGHT SIDE */}
       <div className="flex-1">
-        <div className="flex justify-between text-sm sm:text-base mb-4">
+        <div className="flex justify-center text-sm sm:text-base mb-4">
           <Title text1={"OUR"} text2={"PRODUCTS"} />
         </div>
 
