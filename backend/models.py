@@ -1,6 +1,12 @@
 #models.py
 from extensions import db, bcrypt
 from datetime import datetime
+from zoneinfo import ZoneInfo
+
+from datetime import datetime, timezone, timedelta
+
+def swedish_time():
+    return datetime.now(timezone(timedelta(hours=1)))
 
 
 class User(db.Model):
@@ -90,7 +96,7 @@ class Orders(db.Model):
     method = db.Column(db.String(50))
     total_price = db.Column(db.Integer)
     payment_details = db.Column(db.String(255))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=swedish_time)
     status = db.Column(db.String(50), default="pending")
     items = db.relationship("OrderItems", backref="order", lazy=True)
     address = db.relationship("Address", lazy=True)
