@@ -1,4 +1,4 @@
--- Active: 1771429691299@@127.0.0.1@3306@MeetDatabase
+-- Active: 1763569423496@@localhost@3306@meetdatabase
     CREATE DATABASE IF NOT EXISTS MeetDatabase;
     DROP DATABASE MeetDatabase;
     USE MeetDatabase;
@@ -25,6 +25,7 @@
         price INT,
         description VARCHAR(255),
         is_public BOOLEAN DEFAULT 1,
+        image VARCHAR(255) NULL,
         FOREIGN KEY (category_id) REFERENCES CATEGORY(category_id)
     );
 
@@ -125,3 +126,4 @@ SELECT * FROM USERS WHERE email = 'admin@gmail.com';
 
 DELETE FROM USERS WHERE email = 'admin@gmail.com';
 
+UPDATE ORDERS SET status = 'confirmed' WHERE status = 'pending';
