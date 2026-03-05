@@ -37,7 +37,7 @@ const Navbar = () => {
           <path fill="#6f1811" d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
         </svg>
 
-        {/* new - profile icon: goes to /profile if logged in, /login if not */}
+        {/*profile icon: goes to /profile if logged in, /login if not */}
         <div className='group relative'>
           <Link to={isLoggedIn ? '/profile' : '/login'}>
             <svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px" className="cursor-pointer">
@@ -45,14 +45,28 @@ const Navbar = () => {
             </svg>
           </Link>
 
-          {/* new - dropdown only shows when logged in */}
-          {isLoggedIn && (
-            <div className='group-hover:block hidden absolute dropdown-menu right-0 pt-4 z-10 bg-white shadow-md p-3 flex flex-col gap-2 min-w-[120px]'>
-              <Link to='/profile' className='cursor-pointer hover:text-[#5a3e19] text-xs uppercase tracking-widest' style={{ color: '#6f1811' }}>My Profile</Link>
-              <Link to='/orders' className='cursor-pointer hover:text-[#5a3e19] text-xs uppercase tracking-widest' style={{ color: '#6f1811' }}>Orders</Link>
-              <p onClick={handleLogout} className='cursor-pointer hover:text-red-600 text-xs uppercase tracking-widest' style={{ color: '#6f1811' }}>Log Out</p>
+          {/* new logged in */}
+            {isLoggedIn && (
+              <div className='group-hover:block hidden absolute dropdown-menu right-0 pt-4 z-10'>
+                <div className='bg-white shadow-md flex flex-col min-w-[140px]'>
+                  <Link to='/profile'
+                className='px-5 py-3 text-xs uppercase tracking-widest border-b hover:bg-gray-50 transition-all'
+                style={{ color: '#6f1811', borderColor: 'rgba(111,24,17,0.1)' }}>
+                My Profile
+              </Link>
+              <Link to='/orders'
+                className='px-5 py-3 text-xs uppercase tracking-widest border-b hover:bg-gray-50 transition-all'
+                style={{ color: '#6f1811', borderColor: 'rgba(111,24,17,0.1)' }}>
+                My Orders
+              </Link>
+              <p onClick={handleLogout}
+                className='px-5 py-3 text-xs uppercase tracking-widest cursor-pointer hover:bg-gray-50 transition-all'
+                style={{ color: '#6f1811' }}>
+                Log Out
+              </p>
             </div>
-          )}
+          </div>
+        )}
         </div>
 
         {/* Cart icon */}
