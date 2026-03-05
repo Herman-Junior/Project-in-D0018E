@@ -34,15 +34,15 @@ def initiate_checkout(user_id, total_price, address_id):
     order = Orders(
         user_id=user_id,
         total_price=total_price,
-        address_id=address_id,  # ← från frontend
-        status="pending"
+        address_id=address_id,
+        status="confirmed"  # new - was "pending", now confirmed immediately on checkout
     )
     db.session.add(order)
     db.session.flush()
 
-    create_order_items(order.order_id, user_id)  # ← ersätter hela loopen
+    create_order_items(order.order_id, user_id)
     db.session.commit()
-    return Orders
+    return order  # new - was returning Orders class, now returns order instance
 
 
 @orders_bp.route("/checkout", methods=["POST"])
@@ -91,9 +91,9 @@ def update_payment(order_id):
     if data["method"] not in ("card", "billing"):
         return jsonify({"error": "method must be card or billing"}), 400
 
-    Orders.method = data["method"]
-    Orders.payment_details = data.get("payment_details", "")
-    Orders.status = "confirmed"
+    order.method = data["method"]  # new - was Orders.method (class), now order.method (instance)
+    order.payment_details = data.get("payment_details", "")  # new - same fix
+    order.status = "confirmed"  # new - same fix
     db.session.commit()
 
     return jsonify({"message": "Payment updated", "order": order.to_dict()}), 200
@@ -134,7 +134,7 @@ def cancel_order(order_id):
         if inventory:
             inventory.amount += item.quantity
 
-    Orders.status = "cancelled"
+    order.status = "cancelled"  # new - was Orders.status (class), now order.status (instance)
     db.session.commit()
 
-    return jsonify({"message": "Orders cancelled", "Orders": Orders.to_dict()}), 200
+    return jsonify({"message": "Order cancelled", "order": order.to_dict()}), 200
