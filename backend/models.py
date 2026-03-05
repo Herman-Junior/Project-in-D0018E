@@ -12,7 +12,6 @@ class User(db.Model):
     email = db.Column(db.String(100), unique=True)
     team = db.Column(db.Boolean, default=False)
 
-
     addresses = db.relationship("Address", backref="user", lazy=True)
     orders = db.relationship("Orders", backref="user", lazy=True)
     cart_items = db.relationship("Cart", backref="user", lazy=True)
@@ -32,6 +31,7 @@ class User(db.Model):
             "team": self.team
         }
 
+
 class Address(db.Model):
     __tablename__ = "ADDRESS"
     address_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -40,11 +40,13 @@ class Address(db.Model):
     address = db.Column(db.String(100))
     city = db.Column(db.String(100))
 
+
 class Category(db.Model):
     __tablename__ = "CATEGORY"
     category_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     category_name = db.Column(db.String(50), unique=True)
     products = db.relationship("Products", backref="category", lazy=True)
+
 
 class Products(db.Model):
     __tablename__ = "PRODUCTS"
@@ -54,6 +56,7 @@ class Products(db.Model):
     price = db.Column(db.Integer)
     description = db.Column(db.String(255))
     is_public = db.Column(db.Boolean, default=True)
+    image = db.Column(db.String(255), nullable=True)  # new - image path
 
     inventory = db.relationship("Inventory", backref="product", uselist=False, lazy=True)
     cart_items = db.relationship("Cart", backref="product", lazy=True)
@@ -66,8 +69,11 @@ class Products(db.Model):
             "price": self.price,
             "description": self.description,
             "is_public": self.is_public,
-            "image": "https://placehold.co/400" 
+            "category_id": self.category_id,
+            # new - return real image or placeholder
+            "image": self.image if self.image else "https://placehold.co/400"
         }
+
 
 class Inventory(db.Model):
     __tablename__ = "INVENTORY"
@@ -75,11 +81,12 @@ class Inventory(db.Model):
     amount = db.Column(db.Float)
     unit_type = db.Column(db.String(50))
 
+
 class Orders(db.Model):
     __tablename__ = "ORDERS"
     order_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("USERS.user_id"))
-    address_id = db.Column(db.Integer, db.ForeignKey("ADDRESS.address_id")) 
+    address_id = db.Column(db.Integer, db.ForeignKey("ADDRESS.address_id"))
     method = db.Column(db.String(50))
     total_price = db.Column(db.Integer)
     payment_details = db.Column(db.String(255))
@@ -87,7 +94,7 @@ class Orders(db.Model):
     status = db.Column(db.String(50), default="pending")
     items = db.relationship("OrderItems", backref="order", lazy=True)
     address = db.relationship("Address", lazy=True)
-       
+
     def to_dict(self):
         return {
             "order_id": self.order_id,
@@ -96,13 +103,18 @@ class Orders(db.Model):
             "total_price": self.total_price,
             "method": self.method,
             "payment_details": self.payment_details,
+            # new - include timestamp
+            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M") if self.created_at else None
         }
+
+
 class Cart(db.Model):
     __tablename__ = "CART"
     cart_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("USERS.user_id"))
     product_id = db.Column(db.Integer, db.ForeignKey("PRODUCTS.product_id"))
     quantity = db.Column(db.Float)
+
 
 class OrderItems(db.Model):
     __tablename__ = "ORDER_ITEMS"
@@ -113,6 +125,7 @@ class OrderItems(db.Model):
     snapshot_price = db.Column(db.Integer, nullable=False)
     product = db.relationship("Products", lazy=True)
 
+
 class Review(db.Model):
     __tablename__ = "REVIEW"
     review_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -120,6 +133,3 @@ class Review(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("USERS.user_id"))
     rating = db.Column(db.Integer)
     comment = db.Column(db.String(255))
-
-
-

@@ -8,8 +8,11 @@ const AdminProducts = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [imageFile, setImageFile] = useState(null); // new - image file for upload
+  const [imagePreview, setImagePreview] = useState(null); // new - preview before upload
   const [formData, setFormData] = useState({
-    name: "", description: "", price: "", category_id: "", stock: "", unit_type: "st", is_public: true
+    name: "", description: "", price: "", category_id: "",
+    stock: "", unit_type: "st", is_public: true
   });
   const [priceError, setPriceError] = useState("");
 
@@ -18,7 +21,6 @@ const AdminProducts = () => {
   const loadProducts = async () => {
     setLoading(true);
     try {
-      // new - fetch from admin endpoint to see ALL products including hidden
       const res = await fetch(`${BASE}/api/admin/products`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -37,7 +39,7 @@ const AdminProducts = () => {
       const data = await res.json();
       setCategories(data);
     } catch (err) {
-      console.error("Failed to load categories", err);
+      console.error(err);
     }
   };
 
@@ -49,6 +51,8 @@ const AdminProducts = () => {
   const openAdd = () => {
     setEditingProduct(null);
     setPriceError("");
+    setImageFile(null);
+    setImagePreview(null);
     setFormData({ name: "", description: "", price: "", category_id: "", stock: "", unit_type: "st", is_public: true });
     setIsModalOpen(true);
   };
@@ -56,6 +60,9 @@ const AdminProducts = () => {
   const openEdit = (product) => {
     setEditingProduct(product);
     setPriceError("");
+    setImageFile(null);
+    // new - show existing image as preview when editing
+    setImagePreview(product.image && !product.image.includes("placehold") ? product.image : null);
     setFormData({
       name: product.name,
       description: product.description,
@@ -68,13 +75,18 @@ const AdminProducts = () => {
     setIsModalOpen(true);
   };
 
+  // new - handle image file selection and show preview
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   const handlePriceChange = (e) => {
     const val = e.target.value;
-    if (val < 0) {
-      setPriceError("Price must be a positive number");
-    } else {
-      setPriceError("");
-    }
+    setPriceError(val < 0 ? "Price must be a positive number" : "");
     setFormData({ ...formData, price: val });
   };
 
@@ -106,18 +118,31 @@ const AdminProducts = () => {
           body: JSON.stringify({ amount: parseFloat(formData.stock), unit_type: formData.unit_type })
         });
 
-        alert("Product updated!");
+        // new - upload new image if one was selected while editing
+        if (imageFile) {
+          const imgForm = new FormData();
+          imgForm.append("image", imageFile);
+          await fetch(`${BASE}/api/admin/product/${editingProduct.product_id}/image`, {
+            method: "PUT",
+            headers: { "Authorization": `Bearer ${token}` },
+            body: imgForm
+          });
+        }
+
       } else {
+        // new - use FormData to send image alongside product data
+        const body = new FormData();
+        body.append("name", formData.name);
+        body.append("description", formData.description);
+        body.append("price", parseFloat(formData.price));
+        body.append("category_id", formData.category_id);
+        body.append("is_public", formData.is_public);
+        if (imageFile) body.append("image", imageFile);
+
         const res = await fetch(`${BASE}/api/admin/product`, {
           method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-          body: JSON.stringify({
-            name: formData.name,
-            description: formData.description,
-            price: parseFloat(formData.price),
-            category_id: parseInt(formData.category_id) || null,
-            is_public: formData.is_public
-          })
+          headers: { "Authorization": `Bearer ${token}` },
+          body
         });
         if (!res.ok) { const err = await res.json(); throw new Error(err.error); }
         const newProduct = await res.json();
@@ -129,9 +154,8 @@ const AdminProducts = () => {
             body: JSON.stringify({ amount: parseFloat(formData.stock), unit_type: formData.unit_type })
           });
         }
-
-        alert("Product added!");
       }
+
       setIsModalOpen(false);
       loadProducts();
     } catch (err) {
@@ -140,7 +164,7 @@ const AdminProducts = () => {
   };
 
   const handleDelete = async (product_id) => {
-    if (!window.confirm("Are you sure you want to delete this product? This cannot be undone.")) return;
+    if (!window.confirm("Delete this product? This cannot be undone.")) return;
     try {
       const res = await fetch(`${BASE}/api/admin/product/${product_id}`, {
         method: "DELETE",
@@ -182,12 +206,16 @@ const AdminProducts = () => {
               style={{ borderColor: '#5C1A1B' }}>
 
               <div className="flex items-center gap-4">
-                <img src={p.image || 'https://placehold.co/60x60/png'} alt={p.name} className="w-14 h-14 object-cover" />
+                {/* new - show actual product image */}
+                <img
+                  src={p.image && !p.image.includes("placehold") ? p.image : 'https://placehold.co/60x60/png'}
+                  alt={p.name}
+                  className="w-14 h-14 object-cover"
+                />
                 <div>
                   <p className="font-bold uppercase text-sm" style={{ color: '#5C1A1B' }}>{p.name}</p>
                   <p className="text-xs opacity-60" style={{ color: '#5C1A1B' }}>
                     {p.price} EUR — Stock: {p.stock ?? 0} —
-                    {/* new - show hidden badge for non-public products */}
                     <span style={{ color: p.is_public ? 'green' : 'red' }}>
                       {p.is_public ? " Public" : " Hidden"}
                     </span>
@@ -237,10 +265,9 @@ const AdminProducts = () => {
                   <textarea placeholder="DESCRIPTION" required
                     value={formData.description}
                     onChange={e => setFormData({ ...formData, description: e.target.value })}
-                    className="border p-2 text-sm h-20 outline-none bg-transparent"
+                    className="border p-2 text-sm h-20 outline-none bg-transparent resize-none"
                     style={{ borderColor: '#5C1A1B', color: '#5C1A1B' }} />
 
-                  {/* category dropdown from database */}
                   <div className="flex flex-col gap-1">
                     <label className="text-[10px] uppercase font-bold opacity-60" style={{ color: '#5C1A1B' }}>
                       Category
@@ -248,7 +275,7 @@ const AdminProducts = () => {
                     <select required
                       value={formData.category_id}
                       onChange={e => setFormData({ ...formData, category_id: e.target.value })}
-                      className="border-b p-2 text-sm outline-none bg-transparent uppercase tracking-widest"
+                      className="border-b p-2 text-sm outline-none bg-transparent uppercase"
                       style={{ borderColor: '#5C1A1B', color: '#5C1A1B' }}>
                       <option value="">-- Select Category --</option>
                       {categories.map(cat => (
@@ -260,6 +287,28 @@ const AdminProducts = () => {
                   </div>
                 </>
               )}
+
+              {/* new - image upload for both adding and editing */}
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] uppercase font-bold opacity-60" style={{ color: '#5C1A1B' }}>
+                  {editingProduct ? "Change Image (optional)" : "Product Image"}
+                </label>
+                {/* new - image preview */}
+                {imagePreview && (
+                  <img src={imagePreview} alt="Preview"
+                    className="w-full h-36 object-cover border"
+                    style={{ borderColor: '#5C1A1B' }} />
+                )}
+                <label className="flex items-center gap-3 cursor-pointer border p-2 text-xs uppercase tracking-widest font-bold hover:opacity-70 transition-all"
+                  style={{ borderColor: '#5C1A1B', color: '#5C1A1B' }}>
+                  <span>Choose File</span>
+                  <span className="opacity-50 normal-case font-normal text-xs">
+                    {imageFile ? imageFile.name : "No file chosen"}
+                  </span>
+                  <input type="file" accept="image/*" className="hidden"
+                    onChange={handleImageChange} />
+                </label>
+              </div>
 
               <div className="flex flex-col gap-1">
                 <input type="number" placeholder="PRICE (EUR)" required min="0.01" step="0.01"
@@ -284,7 +333,6 @@ const AdminProducts = () => {
                 className="border-b p-2 text-sm outline-none uppercase tracking-widest bg-transparent"
                 style={{ borderColor: '#5C1A1B', color: '#5C1A1B' }} />
 
-              {/* new - visibility checkbox, hidden products only visible to admin */}
               <label className="flex items-center gap-2 text-xs uppercase tracking-widest cursor-pointer"
                 style={{ color: '#5C1A1B' }}>
                 <input type="checkbox" checked={formData.is_public}

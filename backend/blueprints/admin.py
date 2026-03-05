@@ -1,9 +1,16 @@
-from flask import Blueprint, request, jsonify
+import os
+from werkzeug.utils import secure_filename
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from extensions import db
 from models import User, Products, Inventory, Cart, Orders
 
 admin_bp = Blueprint("admin", __name__)
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def admin_required():
@@ -15,7 +22,7 @@ def admin_required():
     return user, None, None
 
 
-# --- ADD PRODUCT ---
+# --- ADD PRODUCT --- # new - now handles image upload via multipart form
 @admin_bp.route("/product", methods=["POST"])
 @jwt_required()
 def add_product():
@@ -24,14 +31,35 @@ def add_product():
         return err, status
 
     try:
-        data = request.get_json()
+        # new - read from form data instead of JSON to support file upload
+        name = request.form.get("name")
+        price = request.form.get("price")
+        description = request.form.get("description")
+        category_id = request.form.get("category_id")
+        is_public = request.form.get("is_public", "true").lower() == "true"
+
+        image_path = None
+        # new - handle image file upload
+        if "image" in request.files:
+            file = request.files["image"]
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                # new - save to frontend/public/uploads so React serves it directly
+                upload_folder = os.path.join(
+                    current_app.root_path, "..", "frontend", "public", "uploads"
+                )
+                os.makedirs(upload_folder, exist_ok=True)
+                file.save(os.path.join(upload_folder, filename))
+                # new - path relative to React public folder
+                image_path = f"/uploads/{filename}"
 
         new_product = Products(
-            name=data.get("name"),
-            price=data.get("price"),
-            description=data.get("description"),
-            category_id=data.get("category_id"),
-            is_public=data.get("is_public", True)
+            name=name,
+            price=float(price),
+            description=description,
+            category_id=int(category_id) if category_id else None,
+            is_public=is_public,
+            image=image_path  # new - save image path to database
         )
 
         db.session.add(new_product)
@@ -117,6 +145,39 @@ def toggle_visibility(product_id):
 
     status_str = "public" if product.is_public else "hidden"
     return jsonify({"message": f"Product is now {status_str}", "product": product.to_dict()}), 200
+
+
+# --- UPDATE PRODUCT IMAGE --- # new - allows changing image after product is created
+@admin_bp.route("/product/<int:product_id>/image", methods=["PUT"])
+@jwt_required()
+def update_image(product_id):
+    user, err, status = admin_required()
+    if err:
+        return err, status
+
+    product = Products.query.get(product_id)
+    if not product:
+        return jsonify({"error": "Product not found"}), 404
+
+    if "image" not in request.files:
+        return jsonify({"error": "No image file provided"}), 400
+
+    file = request.files["image"]
+    if not file or not allowed_file(file.filename):
+        return jsonify({"error": "Invalid file type"}), 400
+
+    filename = secure_filename(file.filename)
+    upload_folder = os.path.join(
+        current_app.root_path, "..", "frontend", "public", "uploads"
+    )
+    os.makedirs(upload_folder, exist_ok=True)
+    file.save(os.path.join(upload_folder, filename))
+
+    # new - update image path in database
+    product.image = f"/uploads/{filename}"
+    db.session.commit()
+
+    return jsonify({"message": "Image updated", "image": product.image}), 200
 
 
 # --- DELETE USER ---
@@ -213,7 +274,7 @@ def update_inventory(product_id):
     }), 200
 
 
-# --- GET ALL ORDERS with customer info and items ---
+# --- GET ALL ORDERS with customer info, timestamp and cart items ---
 @admin_bp.route("/orders", methods=["GET"])
 @jwt_required()
 def get_all_orders():
@@ -230,7 +291,6 @@ def get_all_orders():
             "method": order.method,
             "status": order.status if order.status else "pending",
             "payment_details": order.payment_details,
-            # new - timestamp
             "created_at": order.created_at.strftime("%Y-%m-%d %H:%M") if order.created_at else "—",
             "user": {
                 "user_id": order.user.user_id,
@@ -245,11 +305,9 @@ def get_all_orders():
             } for item in order.items]
         })
 
-    # new - also get all cart items grouped by user
-    from models import Cart
-    carts = Cart.query.all()
+    all_carts = Cart.query.all()
     cart_by_user = {}
-    for c in carts:
+    for c in all_carts:
         uid = c.user_id
         if uid not in cart_by_user:
             cart_by_user[uid] = {
@@ -287,7 +345,7 @@ def get_all_users():
     } for u in users]), 200
 
 
-# new - GET ALL PRODUCTS including hidden ones for admin view
+# --- GET ALL PRODUCTS including hidden ones for admin ---
 @admin_bp.route("/products", methods=["GET"])
 @jwt_required()
 def get_all_products():
