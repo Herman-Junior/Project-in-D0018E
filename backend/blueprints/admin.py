@@ -228,8 +228,10 @@ def get_all_orders():
             "order_id": order.order_id,
             "total_price": order.total_price,
             "method": order.method,
-            "status": getattr(order, 'status', 'N/A'),
+            "status": order.status if order.status else "pending",
             "payment_details": order.payment_details,
+            # new - timestamp
+            "created_at": order.created_at.strftime("%Y-%m-%d %H:%M") if order.created_at else "—",
             "user": {
                 "user_id": order.user.user_id,
                 "username": order.user.username,
@@ -242,7 +244,29 @@ def get_all_orders():
                 "snapshot_price": item.snapshot_price
             } for item in order.items]
         })
-    return jsonify(result), 200
+
+    # new - also get all cart items grouped by user
+    from models import Cart
+    carts = Cart.query.all()
+    cart_by_user = {}
+    for c in carts:
+        uid = c.user_id
+        if uid not in cart_by_user:
+            cart_by_user[uid] = {
+                "username": c.user.username if c.user else "Unknown",
+                "email": c.user.email if c.user else "",
+                "items": []
+            }
+        cart_by_user[uid]["items"].append({
+            "product_name": c.product.name if c.product else "Deleted product",
+            "quantity": c.quantity,
+            "price": c.product.price if c.product else 0
+        })
+
+    return jsonify({
+        "orders": result,
+        "carts": list(cart_by_user.values())
+    }), 200
 
 
 # --- GET ALL USERS with account info ---
