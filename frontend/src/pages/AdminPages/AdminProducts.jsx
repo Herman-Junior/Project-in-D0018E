@@ -4,14 +4,14 @@ const BASE = "http://127.0.0.1:5000";
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [imageFile, setImageFile] = useState(null); // new - image file for upload
-  const [imagePreview, setImagePreview] = useState(null); // new - preview before upload
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [formData, setFormData] = useState({
-    name: "", description: "", price: "", category_id: "",
+    name: "", description: "", price: "",
+    category_name: "",  // new - text input instead of dropdown
     stock: "", unit_type: "st", is_public: true
   });
   const [priceError, setPriceError] = useState("");
@@ -33,19 +33,10 @@ const AdminProducts = () => {
     }
   };
 
-  const loadCategories = async () => {
-    try {
-      const res = await fetch(`${BASE}/api/categories`);
-      const data = await res.json();
-      setCategories(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // new - removed loadCategories, no longer needed
 
   useEffect(() => {
     loadProducts();
-    loadCategories();
   }, []);
 
   const openAdd = () => {
@@ -53,7 +44,10 @@ const AdminProducts = () => {
     setPriceError("");
     setImageFile(null);
     setImagePreview(null);
-    setFormData({ name: "", description: "", price: "", category_id: "", stock: "", unit_type: "st", is_public: true });
+    setFormData({
+      name: "", description: "", price: "",
+      category_name: "", stock: "", unit_type: "st", is_public: true
+    });
     setIsModalOpen(true);
   };
 
@@ -61,13 +55,12 @@ const AdminProducts = () => {
     setEditingProduct(product);
     setPriceError("");
     setImageFile(null);
-    // new - show existing image as preview when editing
     setImagePreview(product.image && !product.image.includes("placehold") ? product.image : null);
     setFormData({
       name: product.name,
       description: product.description,
       price: product.price,
-      category_id: product.category_id || "",
+      category_name: "",  // new - not needed when editing
       stock: product.stock || 0,
       unit_type: "st",
       is_public: product.is_public
@@ -75,7 +68,6 @@ const AdminProducts = () => {
     setIsModalOpen(true);
   };
 
-  // new - handle image file selection and show preview
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -118,7 +110,6 @@ const AdminProducts = () => {
           body: JSON.stringify({ amount: parseFloat(formData.stock), unit_type: formData.unit_type })
         });
 
-        // new - upload new image if one was selected while editing
         if (imageFile) {
           const imgForm = new FormData();
           imgForm.append("image", imageFile);
@@ -130,12 +121,12 @@ const AdminProducts = () => {
         }
 
       } else {
-        // new - use FormData to send image alongside product data
+        // new - send category_name as plain text, backend finds or creates it automatically
         const body = new FormData();
         body.append("name", formData.name);
         body.append("description", formData.description);
         body.append("price", parseFloat(formData.price));
-        body.append("category_id", formData.category_id);
+        body.append("category_name", formData.category_name);
         body.append("is_public", formData.is_public);
         if (imageFile) body.append("image", imageFile);
 
@@ -206,7 +197,6 @@ const AdminProducts = () => {
               style={{ borderColor: '#5C1A1B' }}>
 
               <div className="flex items-center gap-4">
-                {/* new - show actual product image */}
                 <img
                   src={p.image && !p.image.includes("placehold") ? p.image : 'https://placehold.co/60x60/png'}
                   alt={p.name}
@@ -268,32 +258,20 @@ const AdminProducts = () => {
                     className="border p-2 text-sm h-20 outline-none bg-transparent resize-none"
                     style={{ borderColor: '#5C1A1B', color: '#5C1A1B' }} />
 
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[10px] uppercase font-bold opacity-60" style={{ color: '#5C1A1B' }}>
-                      Category
-                    </label>
-                    <select required
-                      value={formData.category_id}
-                      onChange={e => setFormData({ ...formData, category_id: e.target.value })}
-                      className="border-b p-2 text-sm outline-none bg-transparent uppercase"
-                      style={{ borderColor: '#5C1A1B', color: '#5C1A1B' }}>
-                      <option value="">-- Select Category --</option>
-                      {categories.map(cat => (
-                        <option key={cat.category_id} value={cat.category_id}>
-                          {cat.category_name.toUpperCase()}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  {/* new - type category name directly, auto-created on backend if new */}
+                  <input type="text" placeholder="CATEGORY (e.g. Beef, Pork)" required
+                    value={formData.category_name}
+                    onChange={e => setFormData({ ...formData, category_name: e.target.value })}
+                    className="border-b p-2 text-sm outline-none uppercase tracking-widest bg-transparent"
+                    style={{ borderColor: '#5C1A1B', color: '#5C1A1B' }} />
                 </>
               )}
 
-              {/* new - image upload for both adding and editing */}
+              {/* image upload for both adding and editing */}
               <div className="flex flex-col gap-2">
                 <label className="text-[10px] uppercase font-bold opacity-60" style={{ color: '#5C1A1B' }}>
                   {editingProduct ? "Change Image (optional)" : "Product Image"}
                 </label>
-                {/* new - image preview */}
                 {imagePreview && (
                   <img src={imagePreview} alt="Preview"
                     className="w-full h-36 object-cover border"

@@ -76,7 +76,7 @@ class Products(db.Model):
             "description": self.description,
             "is_public": self.is_public,
             "category_id": self.category_id,
-            # new - return real image or placeholder
+            "category_name": self.category.category_name if self.category else None,
             "image": self.image if self.image else "https://placehold.co/400"
         }
 

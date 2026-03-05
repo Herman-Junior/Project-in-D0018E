@@ -22,7 +22,7 @@ def admin_required():
     return user, None, None
 
 
-# --- ADD PRODUCT --- # new - now handles image upload via multipart form
+# --- ADD PRODUCT ---
 @admin_bp.route("/product", methods=["POST"])
 @jwt_required()
 def add_product():
@@ -31,15 +31,24 @@ def add_product():
         return err, status
 
     try:
-        # new - read from form data instead of JSON to support file upload
+        from models import Category
         name = request.form.get("name")
         price = request.form.get("price")
         description = request.form.get("description")
-        category_id = request.form.get("category_id")
+        category_name = request.form.get("category_name", "").strip()  # new - category as text input
         is_public = request.form.get("is_public", "true").lower() == "true"
 
+        # new - find existing category or create a new one automatically
+        category_id = None
+        if category_name:
+            category = Category.query.filter_by(category_name=category_name).first()
+            if not category:
+                category = Category(category_name=category_name)
+                db.session.add(category)
+                db.session.flush()
+            category_id = category.category_id
+
         image_path = None
-        # new - handle image file upload
         if "image" in request.files:
             file = request.files["image"]
             if file and allowed_file(file.filename):
@@ -50,16 +59,15 @@ def add_product():
                 )
                 os.makedirs(upload_folder, exist_ok=True)
                 file.save(os.path.join(upload_folder, filename))
-                # new - path relative to React public folder
                 image_path = f"/uploads/{filename}"
 
         new_product = Products(
             name=name,
             price=float(price),
             description=description,
-            category_id=int(category_id) if category_id else None,
+            category_id=category_id,  # new - from auto-created or found category
             is_public=is_public,
-            image=image_path  # new - save image path to database
+            image=image_path
         )
 
         db.session.add(new_product)
@@ -147,7 +155,7 @@ def toggle_visibility(product_id):
     return jsonify({"message": f"Product is now {status_str}", "product": product.to_dict()}), 200
 
 
-# --- UPDATE PRODUCT IMAGE --- # new - allows changing image after product is created
+# --- UPDATE PRODUCT IMAGE ---
 @admin_bp.route("/product/<int:product_id>/image", methods=["PUT"])
 @jwt_required()
 def update_image(product_id):
@@ -173,7 +181,6 @@ def update_image(product_id):
     os.makedirs(upload_folder, exist_ok=True)
     file.save(os.path.join(upload_folder, filename))
 
-    # new - update image path in database
     product.image = f"/uploads/{filename}"
     db.session.commit()
 
